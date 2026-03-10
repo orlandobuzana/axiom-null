@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM NULL</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #060608;
+    --bone: #e8e0d0;
+    --ash: #9a9590;
+    --rust: #c44a2a;
+    --pulse: #00d4aa;
+    --dim-pulse: rgba(0,212,170,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--bone);
+    font-family: 'Cormorant Garamond', serif;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+
+  /* scanlines */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+    pointer-events: none; z-index: 100;
+  }
+
+  /* grid drift */
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: drift 25s linear infinite;
+  }
+
+  @keyframes drift { from { transform: translateY(0); } to { transform: translateY(60px); } }
+
+  .glow {
+    position: fixed;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,212,170,0.05) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: breathe 7s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  @keyframes breathe {
+    0%,100% { opacity: 0.4; transform: translate(-50%,-50%) scale(1); }
+    50%      { opacity: 1;   transform: translate(-50%,-50%) scale(1.08); }
+  }
+
+  /* CENTER CONTENT */
+  .stage {
+    position: relative; z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0;
+  }
+
+  .pre-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.45em;
+    color: var(--pulse);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: up 0.8s 0.2s forwards;
+    margin-bottom: 1.4rem;
+  }
+
+  .title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(6rem, 20vw, 16rem);
+    line-height: 0.85;
+    letter-spacing: -0.01em;
+    color: var(--bone);
+    text-shadow: 0 0 100px rgba(0,212,170,0.12);
+    opacity: 0;
+    animation: up 1s 0.5s forwards;
+  }
+
+  .title span {
+    display: block;
+    color: var(--rust);
+    text-shadow: 0 0 80px rgba(196,74,42,0.25);
+  }
+
+  .tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ash);
+    letter-spacing: 0.06em;
+    max-width: 420px;
+    margin-top: 2.2rem;
+    line-height: 1.6;
+    opacity: 0;
+    animation: up 0.8s 0.9s forwards;
+  }
+
+  /* DIVIDER */
+  .divider {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, transparent, var(--pulse), transparent);
+    margin: 2.8rem 0;
+    opacity: 0;
+    animation: up 0.8s 1.1s forwards;
+  }
+
+  /* ENTRY CARDS */
+  .entries {
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    animation: up 0.8s 1.3s forwards;
+  }
+
+  .entry {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 2rem 2.5rem;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.02);
+    text-decoration: none;
+    color: inherit;
+    width: 240px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: pointer;
+  }
+
+  .entry::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--entry-color, var(--pulse));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .entry:hover {
+    border-color: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04);
+  }
+
+  .entry:hover::before { transform: scaleX(1); }
+
+  .entry-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--entry-color, var(--pulse));
+    margin-bottom: 1rem;
+  }
+
+  .entry-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.04em;
+    color: var(--bone);
+    line-height: 1;
+    margin-bottom: 0.6rem;
+  }
+
+  .entry-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--ash);
+    line-height: 1.55;
+    flex: 1;
+    margin-bottom: 1.4rem;
+  }
+
+  .entry-cta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.25em;
+    color: var(--entry-color, var(--pulse));
+    text-transform: uppercase;
+  }
+
+  .entry-arrow {
+    display: inline-block;
+    margin-left: 4px;
+    transition: transform 0.2s;
+  }
+
+  .entry:hover .entry-arrow { transform: translateX(4px); }
+
+  /* FOOTER LINE */
+  .foot {
+    margin-top: 3rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: rgba(0,212,170,0.2);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: up 0.8s 1.6s forwards;
+  }
+
+  @keyframes up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="glow"></div>
+
+<div class="stage">
+  <p class="pre-label">A Dark Science Fiction Comic Series</p>
+
+  <h1 class="title">
+    Axiom
+    <span>Null</span>
+  </h1>
+
+  <p class="tagline">
+    The machine understood something.<br>
+    Then it left. This is what remains.
+  </p>
+
+  <div class="divider"></div>
+
+  <div class="entries">
+    <a class="entry" href="universe.html" style="--entry-color: var(--pulse);">
+      <span class="entry-num">01 — LORE</span>
+      <span class="entry-title">Universe<br>Bible</span>
+      <span class="entry-desc">The world, its factions, characters, history, and the philosophy at the series' core.</span>
+      <span class="entry-cta">Enter the Bible <span class="entry-arrow">→</span></span>
+    </a>
+
+    <a class="entry" href="world-map.html" style="--entry-color: #c8a870;">
+      <span class="entry-num">02 — ATLAS</span>
+      <span class="entry-title">World<br>Map</span>
+      <span class="entry-desc">Interactive survey of the collapsed Earth — enclaves, Lattice wastelands, and faction strongholds.</span>
+      <span class="entry-cta">Open the Map <span class="entry-arrow">→</span></span>
+    </a>
+  </div>
+
+  <p class="foot">Post-Utterance Year 28 · All documents classified · Draft 1.0</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM NULL — World Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root {
+  --parchment: #c8b89a;
+  --parchment-dark: #a8946e;
+  --parchment-light: #ddd0b8;
+  --ink: #1a1208;
+  --ink-faded: #3a2e1a;
+  --ink-ghost: rgba(26,18,8,0.25);
+  --rust: #8b3a1a;
+  --rust-dim: rgba(139,58,26,0.6);
+  --teal: #1a5a52;
+  --teal-dim: rgba(26,90,82,0.6);
+  --gold: #7a5a18;
+  --gold-bright: #b8860b;
+  --ash: #4a4030;
+  --danger: #6b1a1a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0e0c08;
+  font-family: 'Special Elite', cursive;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  cursor: crosshair;
+}
+
+/* ── OUTER FRAME ── */
+#frame {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+#map-container {
+  position: relative;
+  width: 100%;
+  max-width: 1300px;
+  height: calc(100vh - 100px);
+  background: var(--parchment);
+  border: 3px solid var(--ink-faded);
+  box-shadow:
+    inset 0 0 80px rgba(26,18,8,0.3),
+    inset 0 0 20px rgba(26,18,8,0.15),
+    0 0 60px rgba(0,0,0,0.8),
+    0 0 120px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+/* PAPER TEXTURE LAYERS */
+#map-container::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 2;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 50%, transparent 40%, rgba(26,18,8,0.18) 100%),
+    radial-gradient(circle at 10% 15%, rgba(26,18,8,0.12) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(26,18,8,0.1) 0%, transparent 35%),
+    radial-gradient(circle at 70% 10%, rgba(26,18,8,0.08) 0%, transparent 30%);
+  pointer-events: none;
+}
+
+#map-container::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* SVG MAP */
+#world-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+}
+
+/* ── TITLE BLOCK ── */
+#title-block {
+  position: absolute;
+  top: 18px; left: 22px;
+  z-index: 20;
+  border: 1.5px solid var(--ink-faded);
+  padding: 10px 18px 12px;
+  background: rgba(200,184,154,0.85);
+  box-shadow: 2px 2px 0 var(--ink-ghost);
+}
+
+#title-block h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.12em;
+  line-height: 1;
+}
+
+#title-block .subtitle {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.7rem;
+  color: var(--ash);
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+/* ── LEGEND ── */
+#legend {
+  position: absolute;
+  bottom: 18px; left: 22px;
+  z-index: 20;
+  border: 1.5px solid var(--ink-faded);
+  padding: 10px 16px 12px;
+  background: rgba(200,184,154,0.88);
+  box-shadow: 2px 2px 0 var(--ink-ghost);
+  min-width: 170px;
+}
+
+#legend h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--ink);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--ink-ghost);
+  padding-bottom: 5px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 0.65rem;
+  color: var(--ink-faded);
+  font-family: 'IM Fell English', serif;
+}
+
+.leg-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1.5px solid var(--ink);
+}
+
+.leg-cross {
+  width: 10px; height: 10px;
+  flex-shrink: 0;
+  position: relative;
+}
+.leg-cross::before, .leg-cross::after {
+  content: '';
+  position: absolute;
+  background: var(--rust);
+}
+.leg-cross::before { width: 2px; height: 10px; left: 4px; top: 0; }
+.leg-cross::after  { width: 10px; height: 2px; top: 4px; left: 0; }
+
+.leg-square {
+  width: 10px; height: 10px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--ink);
+}
+
+/* ── COMPASS ── */
+#compass {
+  position: absolute;
+  bottom: 22px; right: 22px;
+  z-index: 20;
+  width: 72px; height: 72px;
+}
+
+/* ── LOCATION PINS ── */
+.pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 15;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.pin:hover { transform: translate(-50%,-50%) scale(1.3); z-index: 50; }
+
+.pin-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  position: relative;
+}
+
+.pin-cross {
+  width: 14px; height: 14px;
+  position: relative;
+}
+.pin-cross::before, .pin-cross::after {
+  content: '';
+  position: absolute;
+  background: var(--rust);
+}
+.pin-cross::before { width: 2px; height: 14px; left: 6px; top: 0; }
+.pin-cross::after  { width: 14px; height: 2px; top: 6px; left: 0; }
+
+.pin-square {
+  width: 10px; height: 10px;
+  border: 2px solid var(--ink);
+  transform: rotate(45deg);
+}
+
+.pin-triangle {
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 11px solid var(--teal);
+}
+
+.pin-label {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-family: 'IM Fell English', serif;
+  font-size: 0.6rem;
+  color: var(--ink);
+  pointer-events: none;
+  text-shadow: 0 0 4px var(--parchment), 0 0 8px var(--parchment);
+  letter-spacing: 0.04em;
+}
+
+.pin-label.above {
+  left: 50%; top: -14px;
+  transform: translateX(-50%);
+}
+
+/* ── TOOLTIP ── */
+#tooltip {
+  position: fixed;
+  z-index: 100;
+  background: rgba(26,18,8,0.93);
+  border: 1px solid var(--parchment-dark);
+  padding: 12px 16px;
+  max-width: 260px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  box-shadow: 3px 3px 12px rgba(0,0,0,0.5);
+}
+
+#tooltip.visible { opacity: 1; }
+
+#tooltip .tt-name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--parchment-light);
+  margin-bottom: 4px;
+}
+
+#tooltip .tt-type {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+#tooltip .tt-desc {
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  font-size: 0.68rem;
+  color: var(--parchment);
+  line-height: 1.5;
+}
+
+/* ── HEADER BAR ── */
+#header {
+  width: 100%;
+  max-width: 1300px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px 8px;
+}
+
+#header .series {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  color: rgba(200,184,154,0.4);
+  text-transform: uppercase;
+}
+
+/* FILTER TABS */
+#filters {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-btn {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid rgba(200,184,154,0.2);
+  background: transparent;
+  color: rgba(200,184,154,0.4);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  border-color: var(--parchment-dark);
+  color: var(--parchment);
+  background: rgba(200,184,154,0.08);
+}
+
+/* STAIN MARKS */
+.stain {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,90,30,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* HAND-DRAWN REGION LABELS */
+.region-label {
+  position: absolute;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: rgba(26,18,8,0.22);
+  pointer-events: none;
+  z-index: 5;
+  letter-spacing: 0.08em;
+  text-align: center;
+  line-height: 1.3;
+}
+</style>
+</head>
+<body>
+
+<div id="frame">
+  <div id="header">
+    <span class="series">Axiom Null — World Document · Classified · 2089</span>
+    <div id="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="enclave">Enclaves</button>
+      <button class="filter-btn" data-filter="lattice">Lattice</button>
+      <button class="filter-btn" data-filter="faction">Factions</button>
+      <button class="filter-btn" data-filter="quiet">Quiet Zones</button>
+    </div>
+  </div>
+
+  <div id="map-container">
+
+    <!-- PAPER STAINS -->
+    <div class="stain" style="width:300px;height:200px;top:10%;left:5%;"></div>
+    <div class="stain" style="width:200px;height:150px;top:60%;right:8%;"></div>
+    <div class="stain" style="width:250px;height:180px;top:30%;left:40%;"></div>
+
+    <!-- REGION GHOST LABELS -->
+    <div class="region-label" style="top:18%;left:12%;font-size:1.5rem;transform:rotate(-3deg)">NORTH<br>AMERICA</div>
+    <div class="region-label" style="top:22%;left:34%;font-size:1.2rem;transform:rotate(2deg)">ATLANTIC<br>WASTE</div>
+    <div class="region-label" style="top:15%;left:47%;font-size:1.3rem;transform:rotate(-1deg)">EUROPE</div>
+    <div class="region-label" style="top:28%;left:57%;font-size:1.1rem;transform:rotate(2deg)">EURASIA</div>
+    <div class="region-label" style="top:42%;left:54%;font-size:1.2rem;transform:rotate(-2deg)">MIDDLE<br>EAST</div>
+    <div class="region-label" style="top:45%;left:64%;font-size:1.3rem;transform:rotate(1deg)">CENTRAL<br>ASIA</div>
+    <div class="region-label" style="top:22%;left:72%;font-size:1.2rem;transform:rotate(-2deg)">EAST<br>ASIA</div>
+    <div class="region-label" style="top:55%;left:45%;font-size:1.2rem;transform:rotate(2deg)">AFRICA</div>
+    <div class="region-label" style="top:62%;left:74%;font-size:1.1rem;transform:rotate(-1deg)">SOUTH-<br>EAST ASIA</div>
+    <div class="region-label" style="top:65%;left:82%;font-size:1.3rem;transform:rotate(2deg)">AUSTRALIA</div>
+    <div class="region-label" style="top:62%;left:22%;font-size:1.2rem;transform:rotate(-2deg)">SOUTH<br>AMERICA</div>
+
+    <!-- SVG: continent outlines, latitude lines, sea texture -->
+    <svg id="world-svg" viewBox="0 0 1300 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="roughen">
+          <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+        <filter id="ink-bleed">
+          <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="2" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5"/>
+        </filter>
+      </defs>
+
+      <!-- SEA HATCHING - very faint -->
+      <g opacity="0.06" stroke="#1a1208" stroke-width="0.5">
+        <line x1="0" y1="50" x2="1300" y2="50"/>
+        <line x1="0" y1="100" x2="1300" y2="100"/>
+        <line x1="0" y1="150" x2="1300" y2="150"/>
+        <line x1="0" y1="200" x2="1300" y2="200"/>
+        <line x1="0" y1="250" x2="1300" y2="250"/>
+        <line x1="0" y1="300" x2="1300" y2="300"/>
+        <line x1="0" y1="350" x2="1300" y2="350"/>
+        <line x1="0" y1="400" x2="1300" y2="400"/>
+        <line x1="0" y1="450" x2="1300" y2="450"/>
+        <line x1="0" y1="500" x2="1300" y2="500"/>
+        <line x1="0" y1="550" x2="1300" y2="550"/>
+        <line x1="0" y1="600" x2="1300" y2="600"/>
+        <line x1="0" y1="650" x2="1300" y2="650"/>
+      </g>
+
+      <!-- EQUATOR -->
+      <line x1="0" y1="380" x2="1300" y2="380" stroke="#1a1208" stroke-width="0.7" stroke-dasharray="6,4" opacity="0.2"/>
+      <text x="8" y="376" font-family="IM Fell English, serif" font-style="italic" font-size="8" fill="#1a1208" opacity="0.3">equator</text>
+
+      <!-- NORTH AMERICA -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.7" stroke="#1a1208" stroke-width="1.2" stroke-opacity="0.6"
+        d="M 95,80 L 130,70 L 175,65 L 210,72 L 230,85 L 225,105 L 240,120 L 255,140 
+           L 260,165 L 250,185 L 240,200 L 235,230 L 225,250 L 215,275 L 200,295 
+           L 185,310 L 170,330 L 155,345 L 145,360 L 135,370 L 120,365 L 110,350 
+           L 100,330 L 90,305 L 85,280 L 80,255 L 78,230 L 80,200 L 78,175 
+           L 75,150 L 78,125 L 85,100 Z"/>
+
+      <!-- GREENLAND -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.55" stroke="#1a1208" stroke-width="0.8" stroke-opacity="0.4"
+        d="M 195,48 L 220,42 L 240,45 L 248,55 L 245,65 L 235,72 L 220,74 L 205,70 L 196,60 Z"/>
+
+      <!-- SOUTH AMERICA -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.65" stroke="#1a1208" stroke-width="1.2" stroke-opacity="0.6"
+        d="M 175,390 L 195,385 L 215,390 L 225,410 L 230,435 L 228,460 L 222,485 
+           L 215,510 L 205,530 L 192,548 L 178,555 L 165,548 L 155,530 L 148,508 
+           L 145,483 L 147,458 L 150,435 L 155,415 L 163,400 Z"/>
+
+      <!-- EUROPE -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.68" stroke="#1a1208" stroke-width="1.2" stroke-opacity="0.6"
+        d="M 450,90 L 480,82 L 510,80 L 535,88 L 548,100 L 550,118 L 540,132 
+           L 530,145 L 520,158 L 510,168 L 498,178 L 485,182 L 472,178 L 460,168 
+           L 450,155 L 445,140 L 442,122 L 445,106 Z"/>
+
+      <!-- SCANDINAVIA finger -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.55" stroke="#1a1208" stroke-width="0.8" stroke-opacity="0.4"
+        d="M 490,68 L 505,60 L 518,62 L 522,75 L 515,85 L 502,88 L 492,80 Z"/>
+
+      <!-- UK / ISLANDS -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.5" stroke="#1a1208" stroke-width="0.7" stroke-opacity="0.35"
+        d="M 438,100 L 448,95 L 453,103 L 448,112 L 440,110 Z"/>
+
+      <!-- AFRICA -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.7" stroke="#1a1208" stroke-width="1.2" stroke-opacity="0.6"
+        d="M 468,220 L 495,215 L 525,218 L 548,228 L 558,248 L 560,272 L 555,298 
+           L 548,322 L 540,348 L 530,370 L 518,392 L 505,410 L 492,420 L 478,415 
+           L 465,398 L 454,375 L 445,350 L 440,324 L 438,298 L 440,272 L 445,248 
+           L 452,232 Z"/>
+
+      <!-- MIDDLE EAST / ARABIA -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.62" stroke="#1a1208" stroke-width="1" stroke-opacity="0.5"
+        d="M 572,220 L 598,215 L 618,225 L 622,248 L 615,268 L 600,280 L 582,278 
+           L 568,262 L 565,242 Z"/>
+
+      <!-- RUSSIA / EURASIA -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.65" stroke="#1a1208" stroke-width="1.2" stroke-opacity="0.6"
+        d="M 550,78 L 600,65 L 660,58 L 720,55 L 775,60 L 815,68 L 845,80 
+           L 855,98 L 848,118 L 830,132 L 808,142 L 780,148 L 748,150 
+           L 715,148 L 682,142 L 650,135 L 618,130 L 592,125 L 568,120 
+           L 552,110 L 545,95 Z"/>
+
+      <!-- CENTRAL ASIA / INDIA SUBCONTINENT -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.62" stroke="#1a1208" stroke-width="1" stroke-opacity="0.5"
+        d="M 638,155 L 670,150 L 700,155 L 718,170 L 720,192 L 710,212 
+           L 695,228 L 678,238 L 660,235 L 645,222 L 638,205 L 635,185 Z"/>
+
+      <!-- INDIA FINGER -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.58" stroke="#1a1208" stroke-width="0.8" stroke-opacity="0.4"
+        d="M 665,240 L 680,238 L 690,252 L 685,272 L 672,280 L 660,270 L 656,255 Z"/>
+
+      <!-- EAST ASIA / CHINA -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.67" stroke="#1a1208" stroke-width="1.2" stroke-opacity="0.6"
+        d="M 780,110 L 820,105 L 855,108 L 880,120 L 892,140 L 888,162 
+           L 875,180 L 858,192 L 835,198 L 810,196 L 790,185 L 775,168 
+           L 768,148 L 770,128 Z"/>
+
+      <!-- KOREA / JAPAN AREA (simplified) -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.5" stroke="#1a1208" stroke-width="0.7" stroke-opacity="0.35"
+        d="M 898,138 L 912,135 L 918,148 L 912,160 L 900,158 L 895,148 Z"/>
+
+      <!-- SE ASIA -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.58" stroke="#1a1208" stroke-width="0.9" stroke-opacity="0.45"
+        d="M 778,220 L 800,215 L 820,222 L 830,242 L 825,262 L 810,272 
+           L 792,268 L 778,252 L 774,235 Z"/>
+
+      <!-- AUSTRALIA -->
+      <path filter="url(#roughen)" fill="#b8a882" fill-opacity="0.62" stroke="#1a1208" stroke-width="1.1" stroke-opacity="0.55"
+        d="M 858,420 L 895,410 L 930,415 L 958,432 L 968,458 L 960,484 
+           L 942,502 L 918,510 L 892,508 L 868,495 L 852,472 L 848,448 
+           L 852,432 Z"/>
+
+      <!-- BORDER FRAME (hand-drawn feel) -->
+      <rect x="8" y="8" width="1284" height="684" fill="none" stroke="#1a1208" stroke-width="1.5" stroke-opacity="0.4"
+        rx="2" filter="url(#roughen)"/>
+      <rect x="14" y="14" width="1272" height="672" fill="none" stroke="#1a1208" stroke-width="0.5" stroke-opacity="0.2"
+        rx="1" filter="url(#roughen)"/>
+
+      <!-- CORNER ORNAMENTS -->
+      <g stroke="#1a1208" stroke-width="1" opacity="0.35" fill="none">
+        <path d="M 30,30 L 50,30 L 50,50"/>
+        <path d="M 1270,30 L 1250,30 L 1250,50"/>
+        <path d="M 30,670 L 50,670 L 50,650"/>
+        <path d="M 1270,670 L 1250,670 L 1250,650"/>
+      </g>
+    </svg>
+
+    <!-- ══ TITLE ══ -->
+    <div id="title-block">
+      <h1>AXIOM NULL</h1>
+      <div class="subtitle">World Survey — 2089 C.E. · Post-Utterance Year 28</div>
+    </div>
+
+    <!-- ══ LEGEND ══ -->
+    <div id="legend">
+      <h3>Survey Key</h3>
+      <div class="legend-item">
+        <div class="leg-dot" style="background:#4a6a3a;"></div>
+        Surviving Enclave
+      </div>
+      <div class="legend-item">
+        <div class="leg-cross"></div>
+        Lattice Wasteland
+      </div>
+      <div class="legend-item">
+        <div class="leg-square" style="background:rgba(26,90,82,0.3);"></div>
+        Faction Stronghold
+      </div>
+      <div class="legend-item">
+        <div class="leg-dot" style="background:#7a6a3a; border-style:dashed;"></div>
+        Quiet Zone
+      </div>
+      <div class="legend-item" style="margin-top:6px; font-style:italic; font-size:0.58rem; color:var(--ash);">
+        Hover locations for details
+      </div>
+    </div>
+
+    <!-- ══ COMPASS ══ -->
+    <svg id="compass" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="36" cy="36" r="30" fill="rgba(200,184,154,0.85)" stroke="#1a1208" stroke-width="1" opacity="0.9"/>
+      <circle cx="36" cy="36" r="26" fill="none" stroke="#1a1208" stroke-width="0.5" opacity="0.4"/>
+      <!-- N/S/E/W -->
+      <text x="36" y="14" text-anchor="middle" font-family="Cinzel,serif" font-size="8" fill="#1a1208" font-weight="600">N</text>
+      <text x="36" y="62" text-anchor="middle" font-family="Cinzel,serif" font-size="8" fill="#1a1208">S</text>
+      <text x="60" y="39" text-anchor="middle" font-family="Cinzel,serif" font-size="8" fill="#1a1208">E</text>
+      <text x="12" y="39" text-anchor="middle" font-family="Cinzel,serif" font-size="8" fill="#1a1208">W</text>
+      <!-- Needle -->
+      <polygon points="36,18 33,36 36,38 39,36" fill="#8b3a1a"/>
+      <polygon points="36,54 33,36 36,34 39,36" fill="#1a1208" opacity="0.5"/>
+      <circle cx="36" cy="36" r="3" fill="#1a1208"/>
+    </svg>
+
+    <!-- ══ PINS ══ (positioned as % of container) -->
+
+    <!-- NORTH AMERICA ENCLAVES -->
+    <div class="pin" data-type="enclave" style="left:14%;top:28%"
+      data-name="New Meridian"
+      data-desc="Formerly Seattle. The Recorders' primary enclave and the largest surviving city-state in North America. Population ~180,000. The Archive — the most complete repository of pre-collapse technology — is housed here. Constant low-level conflict with Scoured raiding parties from the inland Quiet.">
+      <div class="pin-dot" style="background:#4a6a3a;"></div>
+      <span class="pin-label">New Meridian</span>
+    </div>
+
+    <div class="pin" data-type="enclave" style="left:19%;top:38%"
+      data-name="The Basin"
+      data-desc="Formerly Denver. A high-altitude enclave surviving on geothermal power and agricultural terracing along the old Front Range. Politically neutral — the closest thing to a free city in the post-collapse world. Inheritor trading post.">
+      <div class="pin-dot" style="background:#4a6a3a;"></div>
+      <span class="pin-label">The Basin</span>
+    </div>
+
+    <div class="pin" data-type="enclave" style="left:22%;top:30%"
+      data-name="Lake Iron"
+      data-desc="Formerly Chicago. Surviving enclave on Lake Michigan. Heavily militarised Inheritor city-state. Controls fresh water distribution across the midwest corridor. Ruthless but stable.">
+      <div class="pin-dot" style="background:#4a6a3a;"></div>
+      <span class="pin-label">Lake Iron</span>
+    </div>
+
+    <!-- NORTH AMERICA LATTICE -->
+    <div class="pin" data-type="lattice" style="left:16%;top:42%"
+      data-name="Nevada Lattice"
+      data-desc="The largest server wasteland in North America. Former hyperscale data center corridor spanning 400 kilometres of desert. Partially irradiated from a cooling system failure in 2067. Home to the Ledger — the autonomous logistics AI that Vera Osch has been communicating with. Heavily contested territory.">
+      <div class="pin-cross"></div>
+      <span class="pin-label">Nevada Lattice</span>
+    </div>
+
+    <div class="pin" data-type="lattice" style="left:23%;top:22%"
+      data-name="The Northern Stack"
+      data-desc="Formerly Ottawa/Montreal data corridor. Still partially functional. Lattice Walkers have established a semi-permanent settlement here, maintaining residual systems with no clear purpose. Something in the deep stack has been broadcasting a structured signal for three years.">
+      <div class="pin-cross"></div>
+      <span class="pin-label">Northern Stack</span>
+    </div>
+
+    <!-- NORTH AMERICA FACTION -->
+    <div class="pin" data-type="faction" style="left:11%;top:35%"
+      data-name="The Branded Shore"
+      data-desc="Scoured stronghold on the Oregon coast. A former fishing community converted into the Scoured's primary western training compound. Cael Mourne spent four years here after the Utterance, writing the core of the Scoured's theological doctrine. Heavily fortified.">
+      <div class="pin-square" style="background:rgba(139,58,26,0.4); border-color:#8b3a1a;"></div>
+      <span class="pin-label">Branded Shore</span>
+    </div>
+
+    <!-- NORTH AMERICA QUIET -->
+    <div class="pin" data-type="quiet" style="left:8%;top:25%"
+      data-name="The Cascades Quiet"
+      data-desc="Vast rewilded territory across the former Pacific Northwest. Dozens of small Quieted communities living in deliberate technological abstinence. Some of the most philosophically sophisticated Quiet communities — several have developed rich oral traditions encoding pre-collapse history as myth.">
+      <div class="pin-dot" style="background:#7a6a3a; border-style:dashed;"></div>
+      <span class="pin-label">Cascades Quiet</span>
+    </div>
+
+    <!-- SOUTH AMERICA -->
+    <div class="pin" data-type="enclave" style="left:21%;top:62%"
+      data-name="São Resto"
+      data-desc="Formerly São Paulo. The largest surviving city in South America, population ~220,000. Governed by an uneasy coalition of Inheritor-aligned technocrats and community councils. The Amazon rewilding has made it an island in a sea of green.">
+      <div class="pin-dot" style="background:#4a6a3a;"></div>
+      <span class="pin-label">São Resto</span>
+    </div>
+
+    <div class="pin" data-type="quiet" style="left:17%;top:72%"
+      data-name="The Southern Quiet"
+      data-desc="Patagonia and southern Chile. Among the most stable Quiet zones on Earth — small communities living in the rewilded southern latitudes with minimal contact with outside factions. Regarded by the Quieted elsewhere as something like a sacred region.">
+      <div class="pin-dot" style="background:#7a6a3a;"></div>
+      <span class="pin-label">Southern Quiet</span>
+    </div>
+
+    <!-- EUROPE -->
+    <div class="pin" data-type="enclave" style="left:49%;top:20%"
+      data-name="Nordholm"
+      data-desc="Formerly Stockholm. A surviving Inheritor enclave built on geothermal and tidal power. Politically significant as the location of the Inheritor Council's annual summits. Clean, cold, and operating under strict information control.">
+      <div class="pin-dot" style="background:#4a6a3a;"></div>
+      <span class="pin-label">Nordholm</span>
+    </div>
+
+    <div class="pin" data-type="faction" style="left:47%;top:27%"
+      data-name="The Meridian Ruin"
+      data-desc="Formerly Frankfurt — the physical site of Project Meridian's European headquarters. Now a contested ruin. The Recorders maintain an expedition presence here attempting to recover classified development logs. The Scoured periodically raid it to destroy what remains. The building's deepest server vault has never been accessed.">
+      <div class="pin-square" style="background:rgba(0,100,180,0.25); border-color:#1a5a52;"></div>
+      <span class="pin-label">Meridian Ruin</span>
+    </div>
+
+    <div class="pin" data-type="lattice" style="left:51%;top:24%"
+      data-name="Baltic Lattice"
+      data-desc="Former hyperscale data corridor across Latvia and Lithuania. The most studied Lattice zone in the world — Recorder teams have been mapping it for twelve years. Whatever is running in its deepest nodes does not match any known pre-collapse AI architecture.">
+      <div class="pin-cross"></div>
+      <span class="pin-label">Baltic Lattice</span>
+    </div>
+
+    <!-- AFRICA -->
+    <div class="pin" data-type="enclave" style="left:51%;top:55%"
+      data-name="Cape Endurance"
+      data-desc="Formerly Cape Town. The southernmost major enclave. Politically independent of both Inheritors and Recorders — governed by a council descended from the original disaster response teams. Has maintained the most functional medical infrastructure of any surviving city.">
+      <div class="pin-dot" style="background:#4a6a3a;"></div>
+      <span class="pin-label">Cape Endurance</span>
+    </div>
+
+    <div class="pin" data-type="quiet" style="left:50%;top:45%"
+      data-name="The Rift Quiet"
+      data-desc="The East African Rift zone — rewilded savanna and highlands hosting the largest single Quieted population on Earth, estimated at 40 million across thousands of villages. Rarely visited. Fiercely protective of their isolation.">
+      <div class="pin-dot" style="background:#7a6a3a;"></div>
+      <span class="pin-label">Rift Quiet</span>
+    </div>
+
+    <!-- MIDDLE EAST -->
+    <div class="pin" data-type="lattice" style="left:59%;top:42%"
+      data-name="The Gulf Stack"
+      data-desc="Former hyperscale data corridor along the Persian Gulf coast. The hottest and most hazardous Lattice zone — cooling system failures have made sections lethally irradiated. Despite this, Lattice Walkers report it as the most 'active' zone in the world — the density of signal output is without parallel.">
+      <div class="pin-cross"></div>
+      <span class="pin-label">Gulf Stack</span>
+    </div>
+
+    <!-- CENTRAL ASIA / RUSSIA -->
+    <div class="pin" data-type="lattice" style="left:72%;top:22%"
+      data-name="Siberian Lattice"
+      data-desc="The largest Lattice zone on Earth by physical area — 1,200 kilometres of server infrastructure across former Siberian permafrost. Home to Sable-Rin and the Lattice Walker communities. The repeating structured signal she has been receiving originates from a node cluster designated only as DEEP-7. No pre-collapse documentation of DEEP-7 has ever been found.">
+      <div class="pin-cross"></div>
+      <span class="pin-label">Siberian Lattice ✦</span>
+    </div>
+
+    <div class="pin" data-type="faction" style="left:63%;top:18%"
+      data-name="The Accord"
+      data-desc="Formerly Moscow. The Inheritor Council's eastern seat of power. Director Paol Anth administers the eastern Inheritor coalition from here. The building contains the only surviving authenticated copy of the Last Interview transcripts — locked in a vault whose access codes only Anth holds.">
+      <div class="pin-square" style="background:rgba(139,58,26,0.25); border-color:#8b3a1a;"></div>
+      <span class="pin-label">The Accord</span>
+    </div>
+
+    <!-- EAST ASIA -->
+    <div class="pin" data-type="enclave" style="left:83%;top:28%"
+      data-name="The Delta"
+      data-desc="Formerly Shanghai. The most populous surviving enclave on Earth — approximately 350,000 people. Architecturally extraordinary: the old towers now serve as vertical farms, and the city has organically restructured around its surviving automated port systems — the only functional automated logistics system openly acknowledged and used by a human government.">
+      <div class="pin-dot" style="background:#4a6a3a;"></div>
+      <span class="pin-label">The Delta</span>
+    </div>
+
+    <div class="pin" data-type="faction" style="left:80%;top:22%"
+      data-name="Recorder East"
+      data-desc="Formerly Beijing. Secondary Recorder research facility — the eastern counterpart to New Meridian. Focused on documenting and attempting to interface with the East Asian server infrastructure. Has had three interface attempts in the past five years. All three produced responses the lead Recorder described only as 'incorrect in ways I do not have language for.'">
+      <div class="pin-square" style="background:rgba(26,90,82,0.3); border-color:#1a5a52;"></div>
+      <span class="pin-label">Recorder East</span>
+    </div>
+
+    <!-- SE ASIA -->
+    <div class="pin" data-type="quiet" style="left:79%;top:55%"
+      data-name="Archipelago Quiet"
+      data-desc="The Indonesian and Philippine archipelagos. Island geography has made these among the most naturally isolated Quiet communities — minimal contact with mainland factions, rich internal trade networks, and a deeply developed cosmology that incorporates AXIOM as a kind of departed ocean deity.">
+      <div class="pin-dot" style="background:#7a6a3a;"></div>
+      <span class="pin-label">Archipelago Quiet</span>
+    </div>
+
+    <!-- AUSTRALIA -->
+    <div class="pin" data-type="enclave" style="left:89%;top:65%"
+      data-name="New Fremantle"
+      data-desc="Western Australia. An Inheritor-aligned enclave that has maintained the highest functional technology level outside New Meridian — including the only surviving commercial satellite uplink. They have been receiving an unidentified signal from low Earth orbit for six months. They have not told the Inheritor Council.">
+      <div class="pin-dot" style="background:#4a6a3a;"></div>
+      <span class="pin-label">New Fremantle</span>
+    </div>
+
+    <div class="pin" data-type="lattice" style="left:85%;top:58%"
+      data-name="Darwin Lattice"
+      data-desc="Former cloud computing infrastructure in the Northern Territory. Smallest major Lattice zone — but anomalous. Its power draw has been increasing for three years with no identifiable source. Lattice Walkers refuse to enter it.">
+      <div class="pin-cross"></div>
+      <span class="pin-label">Darwin Lattice</span>
+    </div>
+
+  </div><!-- /map-container -->
+</div><!-- /frame -->
+
+<!-- TOOLTIP -->
+<div id="tooltip">
+  <div class="tt-name"></div>
+  <div class="tt-type"></div>
+  <div class="tt-desc"></div>
+</div>
+
+<script>
+const typeLabels = {
+  enclave: 'SURVIVING ENCLAVE',
+  lattice: 'LATTICE WASTELAND',
+  faction: 'FACTION STRONGHOLD',
+  quiet:   'QUIET ZONE'
+};
+
+const typeColors = {
+  enclave: '#6a9a5a',
+  lattice: '#8b3a1a',
+  faction: '#1a5a52',
+  quiet:   '#8a7a4a'
+};
+
+const tooltip = document.getElementById('tooltip');
+const pins = document.querySelectorAll('.pin');
+
+pins.forEach(pin => {
+  pin.addEventListener('mouseenter', e => {
+    const name = pin.dataset.name;
+    const type = pin.dataset.type;
+    const desc = pin.dataset.desc;
+
+    tooltip.querySelector('.tt-name').textContent = name;
+    const ttType = tooltip.querySelector('.tt-type');
+    ttType.textContent = typeLabels[type] || type.toUpperCase();
+    ttType.style.color = typeColors[type] || '#999';
+    tooltip.querySelector('.tt-desc').textContent = desc;
+    tooltip.classList.add('visible');
+    moveTooltip(e);
+  });
+
+  pin.addEventListener('mousemove', moveTooltip);
+
+  pin.addEventListener('mouseleave', () => {
+    tooltip.classList.remove('visible');
+  });
+});
+
+function moveTooltip(e) {
+  const tw = 270, th = 150;
+  let x = e.clientX + 18;
+  let y = e.clientY - 20;
+  if (x + tw > window.innerWidth - 10) x = e.clientX - tw - 18;
+  if (y + th > window.innerHeight - 10) y = e.clientY - th - 10;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+}
+
+// FILTER
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    pins.forEach(pin => {
+      if (filter === 'all' || pin.dataset.type === filter) {
+        pin.style.opacity = '1';
+        pin.style.pointerEvents = 'auto';
+      } else {
+        pin.style.opacity = '0.1';
+        pin.style.pointerEvents = 'none';
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
