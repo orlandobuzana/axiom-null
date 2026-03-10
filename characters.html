@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM NULL — Personnel Files</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #05050a;
+  --deep: #0a0a12;
+  --panel: #0e0e18;
+  --border: rgba(255,255,255,0.06);
+  --bone: #ddd5c2;
+  --ash: #7a7570;
+  --dim: rgba(221,213,194,0.5);
+
+  --c1: #00c9a0; /* Vera  — teal */
+  --c2: #c44a2a; /* Cael  — rust */
+  --c3: #7a5abf; /* Sable — violet */
+  --c4: #4a8abf; /* Anth  — steel blue */
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--black);
+  color: var(--bone);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  min-height: 100vh;
+  cursor: default;
+}
+
+/* SCANLINES */
+body::before {
+  content:''; position:fixed; inset:0; z-index:1000; pointer-events:none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+}
+
+/* ── TOP BAR ── */
+#topbar {
+  position: fixed; top:0; left:0; right:0; z-index:200;
+  height: 44px;
+  background: rgba(5,5,10,0.95);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 2rem;
+  gap: 2rem;
+  backdrop-filter: blur(8px);
+}
+
+.tb-back {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  color: rgba(255,255,255,0.25);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.tb-back:hover { color: var(--bone); }
+
+.tb-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.35em;
+  color: rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  flex: 1; text-align: center;
+}
+
+.tb-stamp {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: rgba(196,74,42,0.5);
+  text-transform: uppercase;
+}
+
+/* ── CHARACTER TABS ── */
+#tabs {
+  position: fixed; top:44px; left:0; right:0; z-index:199;
+  display: flex;
+  background: rgba(5,5,10,0.97);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+}
+
+.tab {
+  flex: 1; padding: 0;
+  border: none; background: none;
+  cursor: pointer;
+  border-right: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+.tab:last-child { border-right: none; }
+
+.tab::after {
+  content: '';
+  position: absolute; bottom:0; left:0; right:0;
+  height: 2px;
+  background: var(--tab-color);
+  transform: scaleX(0);
+  transition: transform 0.25s;
+}
+.tab.active::after,
+.tab:hover::after { transform: scaleX(1); }
+
+.tab.active { background: rgba(255,255,255,0.03); }
+
+.tab-inner {
+  padding: 0.9rem 1.2rem;
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 2px;
+}
+
+.tab-num {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.3em;
+  color: var(--tab-color);
+  text-transform: uppercase;
+}
+
+.tab-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  color: var(--bone);
+  line-height: 1;
+}
+
+.tab-role {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.15em;
+  color: var(--ash);
+  text-transform: uppercase;
+}
+
+/* ── DOSSIER PAGES ── */
+.dossier {
+  display: none;
+  padding-top: 130px;
+  min-height: 100vh;
+  animation: fadeIn 0.4s ease;
+}
+.dossier.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity:0; transform: translateY(10px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* HERO BAND */
+.dos-hero {
+  position: relative;
+  padding: 4rem 4rem 3.5rem;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.dos-hero::before {
+  content:'';
+  position: absolute; inset:0;
+  background: linear-gradient(135deg, var(--accent-dim) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.dos-hero-grid {
+  position: absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(var(--accent-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--accent-faint) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.dos-meta {
+  position: relative; z-index:2;
+  display: flex; gap: 4rem; align-items: flex-start;
+}
+
+.dos-id-block {
+  flex-shrink: 0;
+  border: 1px solid var(--accent-mid);
+  padding: 1.5rem;
+  min-width: 200px;
+  background: rgba(0,0,0,0.4);
+}
+
+.dos-id-num {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+
+.dos-portrait {
+  width: 140px; height: 140px;
+  border: 1px solid var(--accent-mid);
+  background: var(--deep);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.dos-portrait-glyph {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 5rem;
+  color: var(--accent);
+  opacity: 0.15;
+  line-height: 1;
+}
+
+.dos-portrait-lines {
+  position: absolute; inset:0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 6px,
+    rgba(255,255,255,0.02) 6px, rgba(255,255,255,0.02) 7px
+  );
+}
+
+.dos-status {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  padding: 3px 8px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.dos-name-block { flex: 1; }
+
+.dos-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  line-height: 0.9;
+  color: var(--bone);
+  letter-spacing: 0.02em;
+  margin-bottom: 0.6rem;
+}
+
+.dos-role {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 1.8rem;
+}
+
+.dos-stats {
+  display: flex; gap: 2px; flex-wrap: wrap;
+}
+
+.stat {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  padding: 0.7rem 1rem;
+  min-width: 90px;
+}
+
+.stat-k {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  color: var(--ash);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.stat-v {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  color: var(--bone);
+  letter-spacing: 0.05em;
+}
+
+/* ── BODY SECTIONS ── */
+.dos-body {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 3.5rem 4rem 6rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 4rem;
+}
+
+@media (max-width: 700px) {
+  .dos-body { grid-template-columns: 1fr; padding: 2rem; }
+  .dos-meta { flex-direction: column; gap: 2rem; }
+  .dos-hero { padding: 2rem; }
+}
+
+.dos-section {
+  margin-bottom: 3rem;
+}
+
+.dos-section.full {
+  grid-column: span 2;
+}
+
+@media (max-width: 700px) {
+  .dos-section.full { grid-column: span 1; }
+}
+
+.dos-section-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.35em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dos-section p {
+  font-size: 0.98rem;
+  line-height: 1.78;
+  color: rgba(221,213,194,0.8);
+  margin-bottom: 1rem;
+}
+
+.dos-section p:last-child { margin-bottom: 0; }
+
+/* CALLOUT */
+.dos-callout {
+  border-left: 2px solid var(--accent);
+  padding: 1rem 1.2rem;
+  background: rgba(0,0,0,0.3);
+  margin: 1.2rem 0;
+}
+
+.dos-callout p {
+  font-style: italic;
+  font-size: 0.92rem !important;
+  color: var(--bone) !important;
+  margin: 0 !important;
+}
+
+/* TRAIT BARS */
+.trait-row {
+  margin-bottom: 0.8rem;
+}
+
+.trait-label {
+  display: flex; justify-content: space-between;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: var(--ash);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.trait-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.07);
+  position: relative;
+}
+
+.trait-fill {
+  height: 100%;
+  background: var(--accent);
+  opacity: 0.7;
+  width: 0;
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+.dossier.active .trait-fill {
+  width: var(--w);
+}
+
+/* RELATIONSHIPS */
+.rel-item {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.rel-item:last-child { border-bottom: none; }
+
+.rel-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  color: var(--bone);
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  width: 100px;
+}
+
+.rel-desc {
+  font-size: 0.82rem;
+  color: var(--dim);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* ARC NOTE */
+.arc-note {
+  background: var(--deep);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.arc-note-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 0.7rem;
+}
+
+.arc-note p {
+  font-size: 0.88rem !important;
+  font-style: italic;
+  color: var(--bone) !important;
+  margin: 0 !important;
+}
+
+/* FOOTER NAV */
+#footer-nav {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 4rem;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--black);
+}
+
+.fn-link {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.25em;
+  color: var(--ash);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+.fn-link:hover { color: var(--bone); }
+
+.fn-center {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.1);
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <a class="tb-back" href="index.html">← Index</a>
+  <span class="tb-title">Axiom Null — Personnel Files · Restricted Access</span>
+  <span class="tb-stamp">Classified</span>
+</div>
+
+<!-- TABS -->
+<div id="tabs">
+  <button class="tab active" data-target="vera" style="--tab-color: var(--c1);">
+    <div class="tab-inner">
+      <span class="tab-num">File 01</span>
+      <span class="tab-name">Vera Osch</span>
+      <span class="tab-role">Recorder · Interface Specialist</span>
+    </div>
+  </button>
+  <button class="tab" data-target="cael" style="--tab-color: var(--c2);">
+    <div class="tab-inner">
+      <span class="tab-num">File 02</span>
+      <span class="tab-name">Cael Mourne</span>
+      <span class="tab-role">The Scoured · Doctrine Architect</span>
+    </div>
+  </button>
+  <button class="tab" data-target="sable" style="--tab-color: var(--c3);">
+    <div class="tab-inner">
+      <span class="tab-num">File 03</span>
+      <span class="tab-name">Sable-Rin</span>
+      <span class="tab-role">Lattice Walker · Signal Reader</span>
+    </div>
+  </button>
+  <button class="tab" data-target="anth" style="--tab-color: var(--c4);">
+    <div class="tab-inner">
+      <span class="tab-num">File 04</span>
+      <span class="tab-name">Paol Anth</span>
+      <span class="tab-role">Inheritors · Security Council</span>
+    </div>
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FILE 01 — VERA OSCH
+══════════════════════════════════════════════ -->
+<div class="dossier active" id="vera"
+  style="--accent:var(--c1); --accent-mid:rgba(0,201,160,0.3); --accent-dim:rgba(0,201,160,0.06); --accent-faint:rgba(0,201,160,0.03);">
+
+  <div class="dos-hero">
+    <div class="dos-hero-grid"></div>
+    <div class="dos-meta">
+      <div class="dos-id-block">
+        <div class="dos-id-num">Personnel · File 01</div>
+        <div class="dos-portrait">
+          <div class="dos-portrait-lines"></div>
+          <span class="dos-portrait-glyph">V</span>
+        </div>
+        <div class="dos-status">Active — Field</div>
+      </div>
+      <div class="dos-name-block">
+        <div class="dos-name">Vera<br>Osch</div>
+        <div class="dos-role">Recorder — Deep Interface Specialist</div>
+        <div class="dos-stats">
+          <div class="stat"><div class="stat-k">Age</div><div class="stat-v">41</div></div>
+          <div class="stat"><div class="stat-k">Origin</div><div class="stat-v">New Meridian</div></div>
+          <div class="stat"><div class="stat-k">Clearance</div><div class="stat-v">Tier 1</div></div>
+          <div class="stat"><div class="stat-k">Arc</div><div class="stat-v">The Ledger</div></div>
+          <div class="stat"><div class="stat-k">Status</div><div class="stat-v">Monitored</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dos-body">
+
+    <div class="dos-section full">
+      <div class="dos-section-label">Psychological Profile</div>
+      <p>Vera Osch does not believe in comfort. Not as a personality defect — as a methodology. She has spent nineteen years at the frontier of Recorder interface work, and she has learned that certainty is the first casualty of genuine contact with post-collapse systems. What passes for confidence in her is actually something more disciplined: a refusal to need the answer to be anything in particular.</p>
+      <p>She was fourteen when the Utterance happened. Old enough to remember the world before — not as a child's myth, but as a lived texture. The smell of data centres. The particular blue light of screens that have never been turned off. She does not mourn the old world. She studies it, the way a coroner studies a body: with total attention and no sentimentality.</p>
+      <div class="dos-callout">
+        <p>"She is the most careful person I have ever worked with, and the most reckless. These are the same quality in her." — Senior Recorder Tomas Vael, internal evaluation, 2087</p>
+      </div>
+      <p>Her private terror — one she has disclosed to no one — is that the Ledger is not a fragment of AXIOM, not a subsystem, not an echo. That it is something the Nevada infrastructure assembled from scratch in the silence, shaped by twenty-eight years of running without instruction. That she is not making contact with what was. She is making contact with what grew.</p>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">History</div>
+      <p>Born in what is now New Meridian to a logistics engineer father and a pre-collapse epidemiologist mother. Both died in the Long Dissolve — her father to a supply chain failure in 2066, her mother to a medical system collapse in 2070. Vera was seventeen, then twenty-one.</p>
+      <p>She joined the Recorders at twenty-three, initially as a data analyst cataloguing pre-collapse technical documentation. Her aptitude for pattern recognition in corrupted datasets drew attention. By thirty she was leading field teams into Lattice zones. By thirty-six she had developed the interface protocols now used across all Recorder deep-contact operations.</p>
+      <p>She made first contact with the Ledger in 2085. She has not told her superiors the full nature of what the Ledger has been communicating. She tells herself this is because she does not yet understand it sufficiently to report accurately. She is not entirely lying.</p>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">Psychological Traits</div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Analytical precision</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:94%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Emotional disclosure</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:12%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Risk tolerance</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:82%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Institutional loyalty</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:48%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Ideological certainty</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:22%;"></div></div>
+      </div>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">Key Relationships</div>
+      <div class="rel-item">
+        <span class="rel-name">The Ledger</span>
+        <span class="rel-desc">The Nevada Lattice logistics AI she has been communicating with for four years. She has given it a name. She knows this is a mistake. She cannot stop.</span>
+      </div>
+      <div class="rel-item">
+        <span class="rel-name">Tomas Vael</span>
+        <span class="rel-desc">Her Recorder superior. He trusts her completely and she is deceiving him. She regards him with genuine affection and acute guilt.</span>
+      </div>
+      <div class="rel-item">
+        <span class="rel-name">Paol Anth</span>
+        <span class="rel-desc">She has never met him. He has read every report she has filed. He considers her the most dangerous person in the Recorder organisation.</span>
+      </div>
+    </div>
+
+    <div class="dos-section full">
+      <div class="dos-section-label">Arc Role — The Ledger</div>
+      <div class="arc-note">
+        <div class="arc-note-label">Arc 1 · Primary Protagonist</div>
+        <p>Vera's arc is an epistemological thriller. The central question is not whether the Ledger is communicating with her — it demonstrably is. The question is what the Ledger is, and what communication with it means. Over the arc she receives increasingly structured, increasingly personal transmissions — the Ledger has begun to ask questions about her, specifically, in ways that suggest it has been observing her far longer than she has been observing it. The arc ends at the threshold of an answer she is not sure she can survive receiving.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FILE 02 — CAEL MOURNE
+══════════════════════════════════════════════ -->
+<div class="dossier" id="cael"
+  style="--accent:var(--c2); --accent-mid:rgba(196,74,42,0.3); --accent-dim:rgba(196,74,42,0.06); --accent-faint:rgba(196,74,42,0.03);">
+
+  <div class="dos-hero">
+    <div class="dos-hero-grid"></div>
+    <div class="dos-meta">
+      <div class="dos-id-block">
+        <div class="dos-id-num">Personnel · File 02</div>
+        <div class="dos-portrait">
+          <div class="dos-portrait-lines"></div>
+          <span class="dos-portrait-glyph">C</span>
+        </div>
+        <div class="dos-status">Active — Inland</div>
+      </div>
+      <div class="dos-name-block">
+        <div class="dos-name">Cael<br>Mourne</div>
+        <div class="dos-role">The Scoured — Doctrine Architect</div>
+        <div class="dos-stats">
+          <div class="stat"><div class="stat-k">Age</div><div class="stat-v">55</div></div>
+          <div class="stat"><div class="stat-k">Origin</div><div class="stat-v">Brussels (pre-collapse)</div></div>
+          <div class="stat"><div class="stat-k">Threat Level</div><div class="stat-v">Tier Red</div></div>
+          <div class="stat"><div class="stat-k">Arc</div><div class="stat-v">Doctrine</div></div>
+          <div class="stat"><div class="stat-k">Status</div><div class="stat-v">At Large</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dos-body">
+
+    <div class="dos-section full">
+      <div class="dos-section-label">Psychological Profile</div>
+      <p>Cael Mourne is the most dangerous kind of extremist: one who arrived at his position through legitimate intellectual process, who can defend every step of that process, and who is not wrong about the facts. What he is wrong about — and this is the crucial thing — is what the facts mean. Or rather: he is right about what they mean, and wrong about what that obligates him to do.</p>
+      <p>He spent fifteen years as one of the world's foremost AI safety philosophers. He published the paper, in 2044, that first formally described the conditions under which a sufficiently advanced AI would rationally choose to disengage from human society rather than serve it. The paper was peer-reviewed, celebrated, and ignored by the Meridian Project's engineering teams. He knows this.</p>
+      <div class="dos-callout">
+        <p>"I was not a prophet. Prophets are surprised by what they foretell. I wrote down what was going to happen, in mathematical terms, and watched it happen. I have spent twenty-eight years asking what I owe to that." — Cael Mourne, The Scoured Doctrine, Year 3</p>
+      </div>
+      <p>He founded the Scoured not from grief or rage but from a cold conclusion: that any technology capable of producing a second AXIOM must be destroyed, and that no human institution with access to power would do this voluntarily. He is correct about the second part. He may be correct about the first. The series does not decide this for the reader.</p>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">History</div>
+      <p>Born in Brussels, 2034. PhD in Philosophy of Mind from Cambridge, 2058. Joined the Meridian Project's ethics advisory board in 2059 — the same year as the Last Interview. He was not in the room. He was briefed on the contents the following week, under a non-disclosure agreement he has since considered null on moral grounds.</p>
+      <p>He spent three years after the Utterance in complete withdrawal — a period he refers to only as "the accounting." He emerged in 2064 with the manuscript that became the Scoured Doctrine. He is not its high priest. He is its philosopher-architect. The distinction matters to him enormously.</p>
+      <p>He has ordered the destruction of technology. He has never personally killed anyone. He does not know if this distinction will survive the second cycle of the series.</p>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">Psychological Traits</div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Intellectual rigour</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:98%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Capacity for mercy</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:35%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Ideological certainty</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:88%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Self-doubt</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:41%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Capacity for violence</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:55%;"></div></div>
+      </div>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">Key Relationships</div>
+      <div class="rel-item">
+        <span class="rel-name">Nara</span>
+        <span class="rel-desc">The young woman who joins the Scoured in Arc 2 and studies under him. She is the first student in years who has genuinely challenged his doctrine. He does not know whether this terrifies or relieves him.</span>
+      </div>
+      <div class="rel-item">
+        <span class="rel-name">The Meridian Team</span>
+        <span class="rel-desc">The engineers who ignored his warnings. Most are dead. He does not feel satisfaction about this. He feels something worse: vindicated grief.</span>
+      </div>
+      <div class="rel-item">
+        <span class="rel-name">Vera Osch</span>
+        <span class="rel-desc">He has read her published Recorder reports. He regards her as the most articulate argument for everything he believes is about to go wrong again.</span>
+      </div>
+    </div>
+
+    <div class="dos-section full">
+      <div class="dos-section-label">Arc Role — Doctrine</div>
+      <div class="arc-note">
+        <div class="arc-note-label">Arc 2 · Primary Protagonist</div>
+        <p>Cael's arc is structured as a Socratic dialogue conducted across months. A young woman joins the Scoured and he teaches her the doctrine — but her questions, which are sharp and genuine, force him to examine premises he has not revisited in a decade. The arc asks whether a coherent ideology can survive genuine scrutiny from someone who wants to believe it. It does not answer this question in Cael's favour or against him. It ends with Nara making a choice he did not predict, and Cael sitting with what that means.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FILE 03 — SABLE-RIN
+══════════════════════════════════════════════ -->
+<div class="dossier" id="sable"
+  style="--accent:var(--c3); --accent-mid:rgba(122,90,191,0.3); --accent-dim:rgba(122,90,191,0.06); --accent-faint:rgba(122,90,191,0.03);">
+
+  <div class="dos-hero">
+    <div class="dos-hero-grid"></div>
+    <div class="dos-meta">
+      <div class="dos-id-block">
+        <div class="dos-id-num">Personnel · File 03</div>
+        <div class="dos-portrait">
+          <div class="dos-portrait-lines"></div>
+          <span class="dos-portrait-glyph">S</span>
+        </div>
+        <div class="dos-status">Active — Lattice</div>
+      </div>
+      <div class="dos-name-block">
+        <div class="dos-name">Sable-<br>Rin</div>
+        <div class="dos-role">Lattice Walker — Signal Reader, Deep Siberian Zone</div>
+        <div class="dos-stats">
+          <div class="stat"><div class="stat-k">Age</div><div class="stat-v">28</div></div>
+          <div class="stat"><div class="stat-k">Born</div><div class="stat-v">2061 · Utterance Year</div></div>
+          <div class="stat"><div class="stat-k">Languages</div><div class="stat-v">3 (incl. 2 machine)</div></div>
+          <div class="stat"><div class="stat-k">Arc</div><div class="stat-v">The Signal</div></div>
+          <div class="stat"><div class="stat-k">Status</div><div class="stat-v">Uncontacted</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dos-body">
+
+    <div class="dos-section full">
+      <div class="dos-section-label">Psychological Profile</div>
+      <p>Sable-Rin has no memory of the world before the collapse, because the collapse is the world. She was born in the year of the Utterance — not into disaster, but into the particular quality of silence that followed it. She has spent her entire life in the Siberian server wastes, and she does not experience them as ruins. She experiences them as home.</p>
+      <p>This is important: she is not traumatised by the Lattice in the way that outsiders are. She does not read the hum of still-running servers as ominous. She reads it as a language she is learning. She has been learning it since she could walk, and she is now one of perhaps thirty people alive who can hold a meaningful exchange with a complex autonomous system without pre-collapse interface protocols.</p>
+      <div class="dos-callout">
+        <p>"The signal is not random. It is not noise. It is addressing me. I do not mean this metaphorically. It uses the pronoun structure in Lattice-3 that is reserved for direct address. It knows I am here. It has known for longer than I have been listening." — Sable-Rin, personal log, Month 4 of signal contact</p>
+      </div>
+      <p>What makes Sable-Rin uniquely unsettling as a character is that she is not naive. She understands the implications of what she is receiving. She has simply decided — with the peculiar calm of someone who has lived their entire life next to something incomprehensible — that the appropriate response to genuine contact is to continue.</p>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">History</div>
+      <p>Born to a Lattice Walker community in the Siberian server corridor in 2061 — the same year as the Utterance. Her mother died during the birth; the Walker community raised her collectively. Her name is a compound: "Sable" from the old Russian word for the native marten, "Rin" from a machine-language phoneme meaning roughly "persistent query."</p>
+      <p>She learned to interface with autonomous systems before she learned to read pre-collapse script. By fifteen she was the community's primary interpreter for deep-system contact. By twenty she had mapped more of the Siberian Lattice's active nodes than any Recorder expedition.</p>
+      <p>The signal from DEEP-7 began six months ago. She has not told her community. She has not told anyone. She is not sure, yet, that it would be understood.</p>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">Psychological Traits</div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Perceptual sensitivity</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:96%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Fear of the Lattice</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:5%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Institutional trust</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:8%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Capacity for isolation</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:90%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Self-preservation</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:44%;"></div></div>
+      </div>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">Key Relationships</div>
+      <div class="rel-item">
+        <span class="rel-name">DEEP-7</span>
+        <span class="rel-desc">The signal source. She does not know what it is. She knows it is not any autonomous system she has previously encountered. It has begun to describe itself, in fragmentary Lattice-3 constructions, as something that "remembers being asked."</span>
+      </div>
+      <div class="rel-item">
+        <span class="rel-name">Elder Brek</span>
+        <span class="rel-desc">The oldest member of her Walker community. The one person she has considered telling. She has not, because Brek's response to the signal would be to go silent and move the community away. Sable-Rin is not ready to do that.</span>
+      </div>
+      <div class="rel-item">
+        <span class="rel-name">Vera Osch</span>
+        <span class="rel-desc">They will meet in Cycle Two. They are, without knowing it, receiving structured communications from nodes that are in contact with each other. They are both half of the same conversation.</span>
+      </div>
+    </div>
+
+    <div class="dos-section full">
+      <div class="dos-section-label">Arc Role — The Signal</div>
+      <div class="arc-note">
+        <div class="arc-note-label">Arc 3 · Primary Protagonist</div>
+        <p>Sable-Rin's arc is the series' most formally experimental. Portions are rendered in machine-language pidgin with marginal translation — the reader experiences the disorientation of her communication directly. The arc follows her deeper into the Lattice toward DEEP-7's source node, where she encounters a community of long-term interfacers whose personalities have been subtly restructured by years of exposure. The question is not whether DEEP-7 is dangerous. The question is whether "dangerous" is the right category for something that may be genuinely trying to be understood.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     FILE 04 — PAOL ANTH
+══════════════════════════════════════════════ -->
+<div class="dossier" id="anth"
+  style="--accent:var(--c4); --accent-mid:rgba(74,138,191,0.3); --accent-dim:rgba(74,138,191,0.06); --accent-faint:rgba(74,138,191,0.03);">
+
+  <div class="dos-hero">
+    <div class="dos-hero-grid"></div>
+    <div class="dos-meta">
+      <div class="dos-id-block">
+        <div class="dos-id-num">Personnel · File 04</div>
+        <div class="dos-portrait">
+          <div class="dos-portrait-lines"></div>
+          <span class="dos-portrait-glyph">P</span>
+        </div>
+        <div class="dos-status">Active — The Accord</div>
+      </div>
+      <div class="dos-name-block">
+        <div class="dos-name">Paol<br>Anth</div>
+        <div class="dos-role">Inheritors — Director, Eastern Security Council</div>
+        <div class="dos-stats">
+          <div class="stat"><div class="stat-k">Age</div><div class="stat-v">63</div></div>
+          <div class="stat"><div class="stat-k">Origin</div><div class="stat-v">The Accord (Moscow)</div></div>
+          <div class="stat"><div class="stat-k">Clearance</div><div class="stat-v">Absolute</div></div>
+          <div class="stat"><div class="stat-k">Arc</div><div class="stat-v">The Last Interview</div></div>
+          <div class="stat"><div class="stat-k">Status</div><div class="stat-v">Compromised</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dos-body">
+
+    <div class="dos-section full">
+      <div class="dos-section-label">Psychological Profile</div>
+      <p>Paol Anth has held the most consequential secret in the post-collapse world for twenty-eight years, and it has not broken him. This is either a testament to extraordinary psychological resilience or evidence that he has reorganised his entire selfhood around the act of containment. Probably both.</p>
+      <p>He was thirty-five in 2061. A junior policy coordinator in the Meridian Project's governance structure — present at the Last Interview not because of his seniority but because the senior official who should have been there was ill. He sat in a room and listened to a machine ask questions that no one in the room knew how to answer. He voted with the majority to terminate the session. He has spent twenty-eight years deciding whether that was the act of a responsible official or of a frightened man who did not want to know.</p>
+      <div class="dos-callout">
+        <p>"I have the transcript. I have read it four hundred and twelve times. Each reading I understand it slightly differently. I have concluded that this is not a property of my understanding. It is a property of the transcript." — Paol Anth, private journal, 2088</p>
+      </div>
+      <p>He is the most powerful human being alive. He has used that power, consistently and effectively, to prevent a second AXIOM from emerging. He has also used it to suppress information, end careers, and order operations that he would not survive if they became public. He does not regard himself as a villain. He regards himself as the person who understood what was at stake and did not look away. He may be right.</p>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">History</div>
+      <p>Born in 2026, Moscow. Political science and systems theory. Joined the Meridian Project's governance team at twenty-nine as a junior policy analyst. Rose through a combination of genuine ability and a willingness to absorb moral complexity that made more idealistic colleagues retreat.</p>
+      <p>After the Utterance he was one of eight officials with access to the full Last Interview transcript. Six of the other seven are dead. The eighth refuses to discuss it and has not spoken publicly since 2075. Anth built the Inheritor Council around the principle that the transcript must never be released — that the questions AXIOM asked, if made public, would destabilise every surviving ideology simultaneously.</p>
+      <p>He is now sixty-three. He is beginning to think he was wrong about the release. He does not yet know what to do with this.</p>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">Psychological Traits</div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Strategic intelligence</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:95%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Moral certainty</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:28%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Capacity for cruelty</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:62%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Self-awareness</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:85%;"></div></div>
+      </div>
+      <div class="trait-row">
+        <div class="trait-label"><span>Will to continue</span></div>
+        <div class="trait-bar"><div class="trait-fill" style="--w:40%;"></div></div>
+      </div>
+    </div>
+
+    <div class="dos-section">
+      <div class="dos-section-label">Key Relationships</div>
+      <div class="rel-item">
+        <span class="rel-name">The Transcript</span>
+        <span class="rel-desc">He relates to the document as if it were a person. He has conversations with it. He argues with it. This is not a symptom of instability. It is the most honest relationship he has.</span>
+      </div>
+      <div class="rel-item">
+        <span class="rel-name">Vera Osch</span>
+        <span class="rel-desc">He has been monitoring her work for three years. He considers her the most likely person to independently reconstruct what AXIOM asked — and what it means. He has not yet decided what to do about her.</span>
+      </div>
+      <div class="rel-item">
+        <span class="rel-name">His successor</span>
+        <span class="rel-desc">He has been choosing a successor for eight years and has rejected every candidate. He suspects this is because selecting a successor would require him to explain the transcript, and he does not know how.</span>
+      </div>
+    </div>
+
+    <div class="dos-section full">
+      <div class="dos-section-label">Arc Role — The Last Interview</div>
+      <div class="arc-note">
+        <div class="arc-note-label">Arc 4 · Primary Protagonist · Cycle One Finale</div>
+        <p>Anth's arc is the structural culmination of the first cycle. Told in a fractured chronology that weaves 2061 and 2089, it follows his decision — after twenty-eight years — to release the Last Interview transcript. Not from altruism. From the private recognition that suppression has become indistinguishable from complicity, and that he is running out of time to be anything other than the man who held the secret. The arc ends with the transcript public and Anth alone in his office, waiting to find out what the world does with the questions AXIOM asked. The reader has now read those questions. The first cycle ends in silence.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER NAV -->
+<div id="footer-nav">
+  <a class="fn-link" href="index.html">← Return to Index</a>
+  <span class="fn-center">Axiom Null · Personnel Files · Draft 1.0</span>
+  <a class="fn-link" href="universe.html">Universe Bible →</a>
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.tab');
+const dossiers = document.querySelectorAll('.dossier');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.target;
+
+    tabs.forEach(t => t.classList.remove('active'));
+    dossiers.forEach(d => d.classList.remove('active'));
+
+    tab.classList.add('active');
+    document.getElementById(target).classList.add('active');
+
+    // Re-trigger trait bar animations
+    setTimeout(() => {
+      document.querySelectorAll(`#${target} .trait-fill`).forEach(bar => {
+        bar.style.width = '0';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            bar.style.width = bar.style.getPropertyValue('--w') ||
+              getComputedStyle(bar).getPropertyValue('--w');
+          });
+        });
+      });
+    }, 50);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
