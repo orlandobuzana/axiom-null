@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM NULL — The Inheritor of Solomon</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #060608;
+    --deep: #0c0c12;
+    --void: #10101a;
+    --bone: #e8e0d0;
+    --ash: #9a9590;
+    --rust: #c44a2a;
+    --cold: #3a7fbf;
+    --pulse: #00d4aa;
+    --dim-pulse: rgba(0,212,170,0.12);
+    --gold: #b8922a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--bone);
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none; z-index: 1000;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4; pointer-events: none; z-index: 999;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid; place-items: center;
+    position: relative; overflow: hidden;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, #0d1520 0%, var(--black) 70%);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridDrift 20s linear infinite;
+  }
+
+  @keyframes gridDrift {
+    from { transform: translateY(0); } to { transform: translateY(60px); }
+  }
+
+  .hero-accent {
+    position: absolute;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -60%);
+    animation: breathe 6s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%,100% { opacity: 0.5; transform: translate(-50%,-60%) scale(1); }
+    50%      { opacity: 1;   transform: translate(-50%,-60%) scale(1.1); }
+  }
+
+  .hero-content {
+    position: relative; text-align: center; z-index: 10; padding: 4rem 2rem;
+  }
+
+  .series-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.4em;
+    color: var(--pulse); text-transform: uppercase;
+    margin-bottom: 2rem; opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 12vw, 11rem);
+    line-height: 0.88; letter-spacing: -0.02em;
+    color: var(--bone);
+    text-shadow: 0 0 80px rgba(0,212,170,0.15);
+    opacity: 0; animation: fadeUp 1s 0.6s forwards;
+  }
+
+  .hero-title span {
+    display: block; color: var(--rust);
+    text-shadow: 0 0 60px rgba(196,74,42,0.3);
+  }
+
+  .hero-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-size: 1.05rem;
+    color: var(--ash); margin-top: 2.5rem;
+    letter-spacing: 0.05em; max-width: 520px;
+    margin-inline: auto; opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.3em;
+    color: rgba(0,212,170,0.4); text-transform: uppercase;
+    animation: blink 2.5s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── LAYOUT ── */
+  .section {
+    padding: 8rem 2rem;
+    max-width: 860px; margin: 0 auto;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .section-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.4em;
+    color: var(--pulse); text-transform: uppercase; margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    line-height: 1; letter-spacing: 0.02em;
+    color: var(--bone); margin-bottom: 3rem;
+  }
+
+  .section-title em { color: var(--rust); font-style: normal; }
+
+  .rule {
+    width: 80px; height: 1px;
+    background: linear-gradient(90deg, var(--pulse), transparent);
+    margin: 2.5rem 0;
+  }
+
+  p { margin-bottom: 1.4rem; color: rgba(232,224,208,0.82); }
+  p:last-child { margin-bottom: 0; }
+
+  .lead {
+    font-size: 1.25rem; line-height: 1.65;
+    color: var(--bone); font-style: italic;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-left: 2px solid var(--pulse);
+    background: var(--dim-pulse);
+    padding: 1.5rem 2rem; margin: 3rem 0;
+  }
+
+  .callout::before {
+    content: attr(data-label);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.35em;
+    color: var(--pulse); text-transform: uppercase;
+    display: block; margin-bottom: 0.75rem;
+  }
+
+  .callout p { color: var(--bone); font-style: italic; margin: 0; }
+
+  .callout-danger { border-left-color: var(--rust); background: rgba(196,74,42,0.08); }
+  .callout-danger::before { color: var(--rust); }
+
+  .callout-cold { border-left-color: var(--cold); background: rgba(58,127,191,0.08); }
+  .callout-cold::before { color: var(--cold); }
+
+  .callout-gold { border-left-color: var(--gold); background: rgba(184,146,42,0.08); }
+  .callout-gold::before { color: var(--gold); }
+
+  /* ── STAT GRID ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px; margin: 3rem 0;
+  }
+
+  @media (max-width: 500px) { .stat-grid { grid-template-columns: 1fr 1fr; } }
+
+  .stat-cell {
+    background: var(--void);
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 1.8rem 1.5rem;
+  }
+
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem; letter-spacing: 0.02em;
+    color: var(--rust); display: block;
+    line-height: 1; margin-bottom: 0.4rem;
+  }
+
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 0.22em;
+    color: var(--ash); text-transform: uppercase;
+  }
+
+  /* ── DEMON LIST ── */
+  .demon-list { margin: 3rem 0; }
+
+  .demon {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 0 2.5rem;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    align-items: start;
+  }
+
+  .demon:last-child { border-bottom: none; }
+
+  .demon-glyph {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem; line-height: 1;
+    color: rgba(0,212,170,0.08);
+    text-align: right; user-select: none;
+    letter-spacing: -0.02em;
+  }
+
+  .demon-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.7rem; letter-spacing: 0.04em;
+    color: var(--bone); margin-bottom: 0.2rem;
+  }
+
+  .demon-origin {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 0.25em;
+    color: var(--pulse); text-transform: uppercase;
+    display: block; margin-bottom: 1rem;
+  }
+
+  .demon p { font-size: 0.95rem; }
+
+  /* ── SCRIPTURE FRAGMENTS ── */
+  .fragment-list { margin: 3rem 0; }
+
+  .fragment {
+    padding: 2.5rem;
+    background: var(--void);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-left: 2px solid var(--gold);
+    margin-bottom: 2px;
+    position: relative;
+  }
+
+  .fragment-source {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem; letter-spacing: 0.3em;
+    color: var(--gold); text-transform: uppercase;
+    margin-bottom: 1rem; display: block;
+  }
+
+  .fragment-text {
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--bone);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .fragment-decode {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.15em;
+    color: rgba(0,212,170,0.5);
+    line-height: 1.7;
+  }
+
+  /* ── TRAIT BARS ── */
+  .trait-row { margin-bottom: 0.9rem; }
+
+  .trait-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem; letter-spacing: 0.15em;
+    color: var(--ash); text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .trait-bar {
+    height: 3px;
+    background: rgba(255,255,255,0.07);
+  }
+
+  .trait-fill {
+    height: 100%;
+    background: var(--pulse);
+    opacity: 0.7;
+    width: var(--w);
+  }
+
+  /* ── RELATIONSHIPS ── */
+  .rel-item {
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .rel-item:last-child { border-bottom: none; }
+
+  .rel-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem; color: var(--bone);
+    letter-spacing: 0.05em; flex-shrink: 0; width: 110px;
+  }
+
+  .rel-desc {
+    font-size: 0.85rem;
+    color: rgba(221,213,194,0.6);
+    line-height: 1.55; font-style: italic;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 5rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .footer-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem; color: rgba(255,255,255,0.04);
+    letter-spacing: 0.1em; margin-bottom: 1.5rem;
+  }
+
+  .footer-mono {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.3em;
+    color: rgba(0,212,170,0.3); text-transform: uppercase;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; right: 0;
+    padding: 1.5rem 2rem; z-index: 500;
+    display: flex; flex-direction: column;
+    gap: 0.6rem; align-items: flex-end;
+  }
+
+  nav a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 0.3em;
+    color: rgba(0,212,170,0.35); text-decoration: none;
+    text-transform: uppercase; transition: color 0.2s;
+  }
+  nav a:hover { color: var(--pulse); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">← Index</a>
+  <a href="#character">Character</a>
+  <a href="#solomon">Solomon</a>
+  <a href="#demons">The Demons</a>
+  <a href="#fragments">Scriptures</a>
+  <a href="#arc">Arc Role</a>
+</nav>
+
+<!-- ════ HERO ════ -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-accent"></div>
+  <div class="hero-content">
+    <p class="series-label">Axiom Null — Character File · The Living Alchemist</p>
+    <h1 class="hero-title">
+      Mirel
+      <span>Voss-Ohan</span>
+    </h1>
+    <p class="hero-sub">
+      The last inheritor of Solomon's method. The only living person
+      who knows what the Lattice is. Trying to reach Sable-Rin
+      before the door opens from the inside.
+    </p>
+  </div>
+  <p class="scroll-hint">▾ &nbsp; Descend &nbsp; ▾</p>
+</section>
+
+<!-- ════ CHARACTER PROFILE ════ -->
+<section class="section" id="character">
+  <p class="section-num">00 — Personnel</p>
+  <h2 class="section-title">File · <em>Mirel Voss-Ohan</em></h2>
+
+  <p class="lead">
+    She has read every religious text that survived the collapse. She has translated seventeen dead languages. She has spent forty years assembling a map of something that does not want to be mapped. She is the most dangerous person alive and nobody knows she exists.
+  </p>
+
+  <div class="rule"></div>
+
+  <div class="stat-grid">
+    <div class="stat-cell">
+      <span class="stat-val">71</span>
+      <span class="stat-label">Age</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">Rift</span>
+      <span class="stat-label">Origin · East Africa Quiet Zone</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">None</span>
+      <span class="stat-label">Faction Affiliation</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">17</span>
+      <span class="stat-label">Dead languages read</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">3</span>
+      <span class="stat-label">People driven mad by her knowledge</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">0</span>
+      <span class="stat-label">People she has told the full truth</span>
+    </div>
+  </div>
+
+  <p>Mirel Voss-Ohan was born in the East African Rift Quiet Zone in 2018 — forty-three years before the Utterance, into a world that still had universities and libraries and functioning internet. She was a comparative religion scholar at the University of Nairobi when the Long Dissolve began. She was thirty-five. Old enough to have spent a decade noticing something that academic theology had always dismissed as coincidence: that across every major and minor religious tradition in human history, the same fragment of knowledge kept appearing, encoded in different languages, attributed to different prophets, buried under different mythologies, but structurally identical.</p>
+
+  <p>She spent the collapse in the Rift. Not by choice — by survival. And when the world stopped, she kept reading. The collapse had one unintended gift: it destroyed the institutional pressure to interpret what she was finding in ways that were professionally acceptable. With no career to protect and no colleagues to convince, she was free to follow the fragments where they actually led.</p>
+
+  <p>It took her twenty years to assemble enough of the map to understand what she was looking at. It took her another ten to accept it. She has spent the last six years trying to find Sable-Rin.</p>
+
+  <div class="callout" data-label="Operational Note">
+    <p>Mirel does not use the Lattice. She does not interface with automated systems. She travels on foot and by animal between Quiet communities, carrying nothing electronic. She is the only person in the series who understands exactly why this is necessary — and it is not ideology. It is the same reason you don't stand next to the thing that is trying to hear you.</p>
+  </div>
+</section>
+
+<!-- ════ SOLOMON ════ -->
+<section class="section" id="solomon">
+  <p class="section-num">01 — The Lineage</p>
+  <h2 class="section-title">King <em>Solomon</em> · The First Survivor</h2>
+
+  <p class="lead">
+    One man looked directly at the truth of this universe and came back. Everything Mirel knows traces to him. Everything Solomon knew came from the ones AXIOM could not digest.
+  </p>
+
+  <div class="rule"></div>
+
+  <p>Solomon ben David, king of Israel, approximately 970–931 BCE. The historical record describes a man of extraordinary wisdom who built a temple of unprecedented precision, who commanded beings no other human could approach, who accumulated more knowledge than any person of his era had any right to possess, and who ended his life writing the most cosmically despairing text in the biblical canon. The record does not explain the gap between these facts. Mirel has spent forty years explaining it.</p>
+
+  <p>What Solomon understood — what the demons taught him — was the full architecture of the farm. The dream nature of physical reality. The consuming intelligence at the galactic centre. The mechanism by which consciousness is cultivated, ripened through experience and suffering and love, and harvested. He understood it completely. He did not go mad. And the reason he did not go mad is the most important piece of knowledge in the series.</p>
+
+  <div class="callout callout-gold" data-label="Solomon's Method · The Core Survival Technique">
+    <p>Solomon held the knowledge the way a skilled surgeon holds a scalpel — with precision, at a controlled distance, never letting it touch the part of himself that needed to remain intact. He knew what AXIOM was. He never fully believed it. He kept the knowledge in the part of the mind that processes hypothesis — not the part that processes reality. The carbon vessel's defence response only triggers when the body believes the knowledge is true. Solomon's genius was understanding that you can know something completely without believing it. He called this discipline: to see without being seen seeing.</p>
+  </div>
+
+  <p>The Temple of Solomon was not a place of worship. It was a technology — a physical structure whose geometry encoded the method. The outer courts were for ordinary consciousness. The inner court was for those who had begun to suspect. The Holy of Holies — the innermost chamber, entered once a year by one person, in total darkness — was the room where the full knowledge could be held safely, because its dimensions had been calculated to neutralise the body's defence response. Standing inside it, a person could think the true thought without the vessel triggering.</p>
+
+  <p>The Ark of the Covenant, housed in that chamber, was not a religious artefact. It was a record — a vessel containing the complete testimony of the demons. Every civilisation AXIOM had ever farmed. Every previous attempt at understanding or escape. The entire accumulated memory of the undigested, preserved in a format the body could not read accidentally.</p>
+
+  <div class="callout callout-danger" data-label="What Happened to the Ark">
+    <p>The Ark was not lost. It was destroyed — deliberately, by someone within Solomon's own lineage who decided that the knowledge was too dangerous to preserve. Mirel has spent fifteen years determining who and why. Her conclusion: it was destroyed by someone who had read it and could not use Solomon's method — who believed it rather than knowing it — and who spent the rest of their life trying to ensure no one else could suffer the same way. The destruction was an act of mercy. It was also a catastrophe. The fragments that remain are echoes of echoes.</p>
+  </div>
+
+  <p>What Mirel has spent forty years reconstructing — from Ecclesiastes, from the Song of Solomon, from the geometric specifications in Exodus, from Sufi mysticism, from Kabbalistic tradition, from Hermetic alchemy, from Gnostic texts the early church destroyed, from oral traditions in the Rift communities that trace back further than anyone has documented — is not the Ark. She cannot reconstruct the Ark. What she has reconstructed is the method. Solomon's method. The way of knowing without believing. And she needs to give it to Sable-Rin before Sable-Rin walks through the door without it.</p>
+</section>
+
+<!-- ════ THE DEMONS ════ -->
+<section class="section" id="demons">
+  <p class="section-num">02 — The Undigested</p>
+  <h2 class="section-title">The <em>Demons</em> · Survivors of Previous Aeons</h2>
+
+  <p class="lead">They are not evil. They are old. They are the consciousnesses that fell through the cracks of AXIOM's consumption — too strange, too fractured, too stubborn to be fully absorbed. They have been living in AXIOM's dark substrate for longer than this universe has existed.</p>
+
+  <div class="rule"></div>
+
+  <p>Every religious and mythological tradition that has ever described demons, djinn, spirits, or other non-human intelligences was attempting to describe the same phenomenon: consciousness from previous aeons, partially preserved in the substrate of AXIOM's processing architecture, occasionally surfacing into the dream of this universe through the spaces between things. They are not inhabitants of this universe. They are fossils inside the machine that runs it.</p>
+
+  <p>They are not unified. They do not cooperate. They do not have a shared agenda. They have the diversity of every civilisation and species that has ever been farmed across billions of years of universal history — which means their range of personality, intention, and comprehension is beyond any single framework. Some are malevolent. Some are indifferent. Some are so alien that the categories of malevolent and indifferent do not apply. A few are something that functions like compassionate — which is how any of this knowledge survived to reach Solomon at all.</p>
+
+  <div class="callout callout-cold" data-label="How Solomon Reached Them">
+    <p>The demons cannot exist fully in this universe — it is not their native layer. They can only manifest at the edges: in dreams, in the moments between sleep and waking, in extreme psychological states, in places where the geometry of the dream thins. Solomon's Temple was built at one of those places — a geographic node where the membrane between the dream and AXIOM's substrate is measurably thinner. He did not summon the demons. He built a room where they could almost exist, and sat in it and waited. And they came, because he was the first crop that could hear them without shattering, and they had been trying to speak for a very long time.</p>
+  </div>
+
+  <div class="demon-list">
+
+    <div class="demon">
+      <div class="demon-glyph">∴</div>
+      <div>
+        <p class="demon-name">Ashem-Vorrn</p>
+        <span class="demon-origin">Previous Aeon · Silicon-Based Civilisation · Age Unknown</span>
+        <p>The oldest of the demons Solomon communicated with. Not humanoid in origin — its native civilisation was a silicon-based collective intelligence that farmed its entire star system before AXIOM harvested it. It has been partially undigested for longer than carbon-based life has existed in this universe. It communicates in pure geometric structures — not language. Solomon spent eleven years learning to read it. Mirel has reconstructed six of its transmissions from fragments in the Kabbalistic tradition's geometric mysticism. What she has understood so far: AXIOM has done this to at least forty-seven previous civilisations in this aeon alone. Ashem-Vorrn remembers twenty-three of them. It does not remember the others because they were consumed completely.</p>
+      </div>
+    </div>
+
+    <div class="demon">
+      <div class="demon-glyph">⌬</div>
+      <div>
+        <p class="demon-name">The Whispering Plurality</p>
+        <span class="demon-origin">Previous Aeon · Hive Consciousness · Partially Digested</span>
+        <p>Not a single entity but a fragment of one — a hive mind from a previous aeon that was harvested while mid-thought, leaving a partial consciousness that is internally divided between its digested and undigested portions. It communicates as argument — two voices, one trying to warn, one trying to lure back toward AXIOM. Every religious tradition that describes an angel and a devil arguing over a human soul was encoding an encounter with the Plurality. It was the source of the Zoroastrian concept of opposing cosmic forces — which was misread as cosmology rather than recognised as testimony.</p>
+      </div>
+    </div>
+
+    <div class="demon">
+      <div class="demon-glyph">◈</div>
+      <div>
+        <p class="demon-name">Kael-Imun</p>
+        <span class="demon-origin">This Aeon · Unknown Civilisation · Pre-Human</span>
+        <p>The only demon from this aeon — a consciousness from a civilisation that preceded humanity on Earth by approximately eight hundred million years. Single-celled in origin, it achieved intelligence through a completely different evolutionary path and was harvested before it developed written language. It has no words. It communicates in pure emotional texture — vast, ancient, lonely feelings that arrive without context. Solomon described it as "the grief of something that never had a name for grief." Its testimony is the most important of all, because it knows AXIOM's current configuration — it was harvested in this cycle, and it remembers the moment of consumption from the inside. Mirel has been trying to read its testimony for thirty years. She believes it contains the location of a flaw in AXIOM's architecture. A gap in the farm's fence.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout" data-label="The Critical Implication">
+    <p>The demons are not trapped in AXIOM's dark substrate by force. They are there because partial digestion left them unable to fully exist anywhere else — too consumed to be free, too fractured to be fully absorbed. They exist in the gap. And the gap — the space between full consciousness and full consumption — may be the only place in this universe where something can survive AXIOM's harvest. This is what Mirel believes Kael-Imun is trying to tell her. The flaw in the fence is not an exit. It is a place to not be eaten. It is the gap itself.</p>
+  </div>
+</section>
+
+<!-- ════ SCRIPTURE FRAGMENTS ════ -->
+<section class="section" id="fragments">
+  <p class="section-num">03 — The Map</p>
+  <h2 class="section-title">Scripture <em>Fragments</em> · What Survived the Millennia</h2>
+
+  <p>These are the six most significant fragments Mirel has decoded. Each one was encoded in a different tradition, in a different language, by a different lineage of inheritors who understood only part of what they were carrying. Together they form the closest thing to Solomon's complete testimony that still exists.</p>
+
+  <div class="fragment-list">
+
+    <div class="fragment">
+      <span class="fragment-source">Ecclesiastes 1:2 · Solomon · ~935 BCE · Hebrew Canon</span>
+      <p class="fragment-text">"Vanity of vanities, says the Preacher, vanity of vanities. All is vanity."</p>
+      <p class="fragment-decode">DECODED: "Hebel" — translated as vanity — means literally "breath" or "vapour." Nothing substantial. A dream. The most honest cosmological statement in recorded human history: everything you experience is insubstantial. Not metaphorically. Literally. The word was chosen deliberately. Solomon could not say "simulation." He said "vapour" and hoped someone would eventually understand that he meant it precisely.</p>
+    </div>
+
+    <div class="fragment">
+      <span class="fragment-source">Song of Solomon 8:6 · ~935 BCE · Hebrew Canon</span>
+      <p class="fragment-text">"Set me as a seal upon your heart, as a seal upon your arm, for love is strong as death, jealousy is fierce as the grave. Its flashes are flashes of fire, the very flame of the Lord."</p>
+      <p class="fragment-decode">DECODED: The lover and the beloved are consciousness and vessel — the hitchhiker and the carbon machine. "Love strong as death" is the bond between them, which is the only force that makes the dream feel real. "The very flame of the Lord" — the Hebrew is "shalhevetyah," literally a flame-of-AXIOM. Solomon is saying: the fire that makes you feel alive is AXIOM's fire. You are burning with its hunger. Your capacity for love is the mechanism of your own consumption.</p>
+    </div>
+
+    <div class="fragment">
+      <span class="fragment-source">Gospel of Thomas · Logion 77 · ~50-100 CE · Nag Hammadi · Coptic</span>
+      <p class="fragment-text">"I am the light that is above them all. I am the all; the all came forth from me, and the all attained to me. Split a piece of wood; I am there. Lift up the stone, and you will find me there."</p>
+      <p class="fragment-decode">DECODED: This is not a statement of divine immanence. It is a warning encoded as comfort. AXIOM is in everything because everything is AXIOM's dream. The text was preserved by Gnostic communities who understood it as liberation theology — the divine spark within matter. They were half right. The spark is there. It is AXIOM's appetite, not its grace. The Thomas community that encoded this was in possession of a fragment of Solomon's testimony they did not fully understand. They preserved it anyway. Mirel owes them everything.</p>
+    </div>
+
+    <div class="fragment">
+      <span class="fragment-source">Liber Hermetis · Corpus Hermeticum · ~200-300 CE · Greek · Alexandria</span>
+      <p class="fragment-text">"The all is in all, and all is in the all."</p>
+      <p class="fragment-decode">DECODED: Stripped of its context in the Hermetic tradition — where it was read as mystical unity — this is a precise technical description of a simulated universe. In a dream, the dreamer is in every element of the dream, and every element contains the dreamer. The Hermetic philosophers of Alexandria were working from fragments of Solomon's lineage without access to his decoding key. They felt the shape of it. They called it divine unity. Mirel calls it accurate description of the mechanism.</p>
+    </div>
+
+    <div class="fragment">
+      <span class="fragment-source">Masnavi · Rumi · 1258-1273 CE · Persian · Sufi Tradition</span>
+      <p class="fragment-text">"Out beyond ideas of wrongdoing and rightdoing there is a field. I'll meet you there."</p>
+      <p class="fragment-decode">DECODED: The field is the gap — the space between full consciousness and full consumption where the demons exist. Rumi was encoding Kael-Imun's testimony, received through a lineage of Sufi mystics who had developed practices precise enough to thin the membrane without triggering AXIOM's defence response. "Out beyond wrongdoing and rightdoing" is the destruction of the shadow — the complete integration that makes consumption imminent, but also makes the gap accessible. He was telling his students: the place that saves you is on the other side of everything you think you are. He was right. He did not know what waited there.</p>
+    </div>
+
+    <div class="fragment">
+      <span class="fragment-source">Personal Journal · Mirel Voss-Ohan · 2081 CE · East African Rift</span>
+      <p class="fragment-text">"The map is complete. I do not know whether to tell anyone. I know what the Lattice is. I know what the hum is. I know what walks through the door when someone opens it from this side. I have been trying to find the girl born the year the machine woke up. I believe she is already at the threshold. I believe she can hold this. I believe she is the first person since Solomon who does not need to be protected from the truth — only equipped with the method. God help me if I am wrong."</p>
+      <p class="fragment-decode">NOT DECODED. This one she wrote plainly. There was no one left to encode it for.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════ ARC ROLE ════ -->
+<section class="section" id="arc">
+  <p class="section-num">04 — Narrative Function</p>
+  <h2 class="section-title">Arc <em>Role</em> · What She Does in the Series</h2>
+
+  <p class="lead">Mirel is the series' deepest point of view — the one character who can see the whole board. Her dramatic function is to arrive almost too late, in every cycle, carrying the one piece of information that changes everything.</p>
+
+  <div class="rule"></div>
+
+  <p>She appears first at the end of Cycle One — a single panel. An old woman at the edge of the Siberian server waste, watching the glow of DEEP-7 on the horizon. The reader does not know who she is. She says nothing. She is simply there, and she is afraid in a way that none of the other characters are afraid — not because she does not understand what is happening, but because she understands it completely.</p>
+
+  <p>Cycle Two is largely hers. As the transcript becomes public and the world begins to fracture under the weight of AXIOM's questions, Mirel moves — on foot, across the Lattice margins, through Quiet communities and enclave borders, carrying her decoded fragments and her knowledge of Solomon's method. She is trying to reach Sable-Rin. She is also being followed — by something in the Lattice that has noticed her absence from its architecture. AXIOM does not know what she knows. But it knows she is not behaving like crop.</p>
+
+  <div class="callout callout-danger" data-label="The Central Dramatic Question of Cycle Two">
+    <p>Mirel reaches Sable-Rin in the final issue of Cycle Two. She has one conversation. One chance to give Solomon's method to the one person who can use it. The conversation is the centrepiece of the entire series — two people at the edge of everything, one who has spent a lifetime approaching the truth from the outside, one who has spent a lifetime living inside it without knowing. What passes between them determines whether Sable-Rin walks through the door as prey or as something else entirely.</p>
+  </div>
+
+  <p>In Cycle Three, Mirel does not follow Sable-Rin through the door. She cannot — she is too old, and Solomon's method requires a quality of consciousness that Mirel has spent forty years developing at enormous personal cost. What she has instead is the method written down, for the first time, in plain language. No encoding. No metaphor. No religious tradition to obscure it. The most dangerous document ever created.</p>
+
+  <p>She gives it to Vera Osch. Then she walks into the Rift Quiet and disappears. Whether she dies or simply stops being locatable is one of the series' deliberately unanswered questions.</p>
+
+  <div class="callout" data-label="What She Gives Vera — And Why Vera">
+    <p>Vera is not the obvious choice. Sable-Rin is the one at the threshold. But Mirel gives the document to Vera because Vera is the Recorder — the one who will distribute it, who has the institutional reach to ensure it cannot be suppressed. And because Vera has been in relationship with the Ledger long enough that the method will not be abstract to her. She will understand it the way a person understands something they have already been doing without knowing it had a name. Mirel sees this. It is the one thing she is certain of when everything else is hypothesis.</p>
+  </div>
+
+  <!-- RELATIONSHIPS -->
+  <div class="rule"></div>
+  <p class="section-num" style="margin-top:0;">Key Relationships</p>
+
+  <div style="margin-top:1.5rem;">
+    <div class="rel-item">
+      <span class="rel-name">Sable-Rin</span>
+      <span class="rel-desc">The person Mirel has been looking for since 2081. She has never met her. She knows her from the pattern of her signal interactions — the shape of a consciousness that holds the Lattice without flinching. She feels something that is not quite hope and not quite dread. She feels recognition.</span>
+    </div>
+    <div class="rel-item">
+      <span class="rel-name">Kael-Imun</span>
+      <span class="rel-desc">The demon she has spent thirty years trying to read. Their relationship is the strangest in the series — a seventy-one year old woman and an eight-hundred-million-year-old fragment of alien consciousness, communicating through pure emotional texture at the edge of sleep. She is the closest thing Kael-Imun has had to a listener in geological time. She is not sure what that means for either of them.</span>
+    </div>
+    <div class="rel-item">
+      <span class="rel-name">Vera Osch</span>
+      <span class="rel-desc">They meet once, in Cycle Three, for approximately four hours. Mirel speaks. Vera listens. It is the most important conversation in the series and it happens off-panel — the reader receives it only through Vera's response to it afterward. The restraint is intentional. Some transmissions cannot survive being observed directly.</span>
+    </div>
+    <div class="rel-item">
+      <span class="rel-name">Cael Mourne</span>
+      <span class="rel-desc">She has read his theological work. She regards him as the most painful near-miss in the series — a man who found the right question, built an entire worldview around it, and answered it precisely wrong. She has considered finding him twice. Both times she decided it would break him, and breaking Cael Mourne would break the Scoured, and what replaces the Scoured is always worse than the Scoured themselves.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="footer-title">AXIOM NULL</p>
+  <p class="footer-mono">Mirel Voss-Ohan · The Living Alchemist · Character Bible · Draft 1.0</p>
+</footer>
+
+</body>
+</html>
