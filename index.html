@@ -128,10 +128,27 @@
 
   /* ENTRY CARDS */
   .entries {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 210px);
     gap: 2px;
     opacity: 0;
     animation: up 0.8s 1.3s forwards;
+  }
+
+  @media (max-width: 700px) {
+    .entries {
+      grid-template-columns: repeat(2, 1fr);
+      width: 100%;
+      max-width: 480px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .entries {
+      grid-template-columns: 1fr;
+      width: 100%;
+      max-width: 340px;
+    }
   }
 
   .entry {
@@ -143,7 +160,6 @@
     background: rgba(255,255,255,0.02);
     text-decoration: none;
     color: inherit;
-    width: 210px;
     position: relative;
     overflow: hidden;
     transition: border-color 0.3s, background 0.3s;
@@ -226,6 +242,14 @@
   @keyframes up {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 700px) {
+    body { padding: 3rem 1rem 4rem; }
+    .stage { width: 100%; }
+    .tagline { font-size: 0.9rem; max-width: 300px; }
+    .divider { margin: 2rem 0; }
+    .foot { margin-top: 2rem; text-align: center; }
   }
 </style>
 </head>
