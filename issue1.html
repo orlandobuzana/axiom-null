@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM NULL — Issue One Script</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #060608;
+    --deep: #0c0c12;
+    --void: #10101a;
+    --bone: #e8e0d0;
+    --ash: #9a9590;
+    --rust: #c44a2a;
+    --cold: #3a7fbf;
+    --pulse: #00d4aa;
+    --dim-pulse: rgba(0,212,170,0.12);
+    --gold: #b8922a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--bone);
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 17px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none; z-index: 1000;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4; pointer-events: none; z-index: 999;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid; place-items: center;
+    position: relative; overflow: hidden;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, #0d1520 0%, var(--black) 70%);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridDrift 20s linear infinite;
+  }
+
+  @keyframes gridDrift { from { transform: translateY(0); } to { transform: translateY(60px); } }
+
+  .hero-accent {
+    position: absolute;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -60%);
+    animation: breathe 6s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%,100% { opacity: 0.5; transform: translate(-50%,-60%) scale(1); }
+    50%      { opacity: 1;   transform: translate(-50%,-60%) scale(1.1); }
+  }
+
+  .hero-content {
+    position: relative; text-align: center; z-index: 10; padding: 4rem 2rem;
+  }
+
+  .series-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.4em;
+    color: var(--pulse); text-transform: uppercase;
+    margin-bottom: 2rem; opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 12vw, 11rem);
+    line-height: 0.88; letter-spacing: -0.02em;
+    color: var(--bone);
+    text-shadow: 0 0 80px rgba(0,212,170,0.15);
+    opacity: 0; animation: fadeUp 1s 0.6s forwards;
+  }
+
+  .hero-title span { display: block; color: var(--rust); text-shadow: 0 0 60px rgba(196,74,42,0.3); }
+
+  .hero-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-size: 1.05rem;
+    color: var(--ash); margin-top: 2.5rem;
+    letter-spacing: 0.05em; max-width: 520px;
+    margin-inline: auto; opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.3em;
+    color: rgba(0,212,170,0.4); text-transform: uppercase;
+    animation: blink 2.5s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* SCRIPT LAYOUT */
+  .script-wrap {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 6rem 2rem 8rem;
+  }
+
+  /* COVER PAGE BLOCK */
+  .cover-block {
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 3rem;
+    margin-bottom: 5rem;
+    background: var(--void);
+    border-top: 2px solid var(--pulse);
+  }
+
+  .cover-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 0.3rem 2rem;
+    margin-bottom: 0.5rem;
+    align-items: baseline;
+  }
+
+  .cover-key {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 0.25em;
+    color: var(--ash); text-transform: uppercase;
+  }
+
+  .cover-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; color: var(--bone);
+  }
+
+  .cover-val.em {
+    color: var(--pulse);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.1em;
+  }
+
+  /* PAGE BLOCK */
+  .page-block {
+    margin-bottom: 5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    padding-bottom: 4rem;
+  }
+
+  .page-block:last-child { border-bottom: none; }
+
+  .page-header {
+    display: flex;
+    align-items: baseline;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0,212,170,0.12);
+  }
+
+  .page-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem; line-height: 1;
+    color: rgba(255,255,255,0.06);
+    letter-spacing: -0.02em; user-select: none;
+    flex-shrink: 0;
+  }
+
+  .page-meta {
+    flex: 1;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem; letter-spacing: 0.04em;
+    color: var(--bone); line-height: 1; margin-bottom: 0.3rem;
+  }
+
+  .page-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem; letter-spacing: 0.22em;
+    color: var(--ash); text-transform: uppercase;
+  }
+
+  /* PANEL BLOCK */
+  .panel-block {
+    margin-bottom: 2.5rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .panel-block:last-child { margin-bottom: 0; }
+
+  .panel-header {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.3em;
+    color: var(--pulse); text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  /* PANEL DESCRIPTION */
+  .panel-desc {
+    font-size: 0.95rem;
+    color: rgba(232,224,208,0.75);
+    line-height: 1.72;
+    margin-bottom: 1.2rem;
+    font-style: italic;
+  }
+
+  /* CAPTION */
+  .caption {
+    background: rgba(255,255,255,0.03);
+    border-left: 2px solid var(--ash);
+    padding: 0.7rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .caption-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.5rem; letter-spacing: 0.25em;
+    color: var(--ash); text-transform: uppercase;
+    margin-bottom: 0.35rem; display: block;
+  }
+
+  .caption p {
+    font-size: 0.9rem;
+    color: var(--bone);
+    margin: 0; line-height: 1.6;
+    font-style: italic;
+  }
+
+  /* DIALOGUE */
+  .dialogue {
+    background: rgba(0,212,170,0.04);
+    border-left: 2px solid var(--pulse);
+    padding: 0.7rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .dialogue-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.5rem; letter-spacing: 0.25em;
+    color: var(--pulse); text-transform: uppercase;
+    margin-bottom: 0.35rem; display: block;
+  }
+
+  .dialogue p {
+    font-size: 0.95rem;
+    color: var(--bone);
+    margin: 0; line-height: 1.6;
+  }
+
+  /* LEDGER DIALOGUE */
+  .dialogue-ledger {
+    background: rgba(0,212,170,0.07);
+    border-left: 2px solid var(--pulse);
+    padding: 0.7rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .dialogue-ledger .dialogue-label { color: var(--pulse); }
+
+  .dialogue-ledger p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 0.05em;
+    color: var(--pulse); line-height: 1.9;
+    margin: 0;
+  }
+
+  .dialogue-ledger p.dim { color: rgba(0,212,170,0.45); }
+
+  /* SFX */
+  .sfx {
+    background: rgba(196,74,42,0.06);
+    border-left: 2px solid var(--rust);
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .sfx-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.5rem; letter-spacing: 0.25em;
+    color: var(--rust); text-transform: uppercase;
+    margin-bottom: 0.2rem; display: block;
+  }
+
+  .sfx p {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: 0.1em;
+    color: var(--rust); margin: 0;
+  }
+
+  /* TRANSITION */
+  .transition {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem; letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.15); text-transform: uppercase;
+    text-align: right; margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  /* WRITER NOTE */
+  .writer-note {
+    background: rgba(184,146,42,0.06);
+    border-left: 2px solid var(--gold);
+    padding: 1rem 1.2rem;
+    margin: 1.5rem 0;
+  }
+
+  .writer-note::before {
+    content: 'Writer Note';
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.52rem; letter-spacing: 0.3em;
+    color: var(--gold); text-transform: uppercase;
+    display: block; margin-bottom: 0.5rem;
+  }
+
+  .writer-note p {
+    font-size: 0.88rem;
+    color: rgba(232,224,208,0.65);
+    font-style: italic; margin: 0; line-height: 1.6;
+  }
+
+  /* SECTION DIVIDERS */
+  .script-section {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.4em;
+    color: var(--pulse); text-transform: uppercase;
+    margin-bottom: 3rem; padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(0,212,170,0.15);
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center; padding: 5rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .footer-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem; color: rgba(255,255,255,0.04);
+    letter-spacing: 0.1em; margin-bottom: 1.5rem;
+  }
+
+  .footer-mono {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.3em;
+    color: rgba(0,212,170,0.3); text-transform: uppercase;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; right: 0;
+    padding: 1.5rem 2rem; z-index: 500;
+    display: flex; flex-direction: column;
+    gap: 0.5rem; align-items: flex-end;
+  }
+
+  nav a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.56rem; letter-spacing: 0.28em;
+    color: rgba(0,212,170,0.3); text-decoration: none;
+    text-transform: uppercase; transition: color 0.2s;
+  }
+  nav a:hover { color: var(--pulse); }
+
+  @media (max-width: 600px) {
+    .cover-row { grid-template-columns: 1fr; gap: 0; }
+    .cover-key { margin-bottom: 0.1rem; }
+    nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">← Index</a>
+  <a href="#cover">Cover</a>
+  <a href="#p1">Page 1</a>
+  <a href="#p2">Page 2</a>
+  <a href="#p3">Page 3</a>
+  <a href="#p4">Page 4</a>
+  <a href="#p5">Page 5</a>
+  <a href="#p6">Page 6</a>
+  <a href="#p7">Page 7</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-accent"></div>
+  <div class="hero-content">
+    <p class="series-label">Axiom Null — Arc One · Issue One · Full Script</p>
+    <h1 class="hero-title">
+      The Ledger
+      <span>Issue One</span>
+    </h1>
+    <p class="hero-sub">
+      "Silk Worms" · Written draft · For artist reference ·
+      Nevada desert, 3am, 2089 CE.
+      Vera Osch finds a door that was waiting for her.
+    </p>
+  </div>
+  <p class="scroll-hint">▾ &nbsp; Read &nbsp; ▾</p>
+</section>
+
+<!-- SCRIPT -->
+<div class="script-wrap">
+
+  <!-- COVER INFO -->
+  <div class="cover-block" id="cover">
+    <div class="cover-row">
+      <span class="cover-key">Series</span>
+      <span class="cover-val">Axiom Null</span>
+    </div>
+    <div class="cover-row">
+      <span class="cover-key">Arc</span>
+      <span class="cover-val">One — The Ledger</span>
+    </div>
+    <div class="cover-row">
+      <span class="cover-key">Issue</span>
+      <span class="cover-val">One of Six</span>
+    </div>
+    <div class="cover-row">
+      <span class="cover-key">Title</span>
+      <span class="cover-val">Silk Worms</span>
+    </div>
+    <div class="cover-row">
+      <span class="cover-key">Pages</span>
+      <span class="cover-val">22 + Cover</span>
+    </div>
+    <div class="cover-row">
+      <span class="cover-key">POV</span>
+      <span class="cover-val">Vera Osch — Age 41 — Recorder, Deep Interface Specialist</span>
+    </div>
+    <div class="cover-row">
+      <span class="cover-key">Location</span>
+      <span class="cover-val">Nevada Lattice · Former hyperscale data corridor · 2089 CE</span>
+    </div>
+    <div class="cover-row">
+      <span class="cover-key">Time</span>
+      <span class="cover-val">03:00 UTC — Before dawn</span>
+    </div>
+    <div class="cover-row">
+      <span class="cover-key">Tone</span>
+      <span class="cover-val em">Cold. Quiet. The world is broken and she has made peace with that. She has not made peace with what she is finding.</span>
+    </div>
+
+    <div class="writer-note" style="margin-top:2rem;">
+      <p>This issue introduces Vera and establishes the series' visual and tonal register. No exposition dumps. No backstory dialogue. Everything the reader needs to know about the world arrives through what Vera observes and what she thinks. Trust the reader. The world is broken — we see that, we don't explain it. The Ledger is strange — we feel that, we don't annotate it. The issue ends on the Ledger's first full message. The reader should feel, on the last page, that they have walked through a door they cannot walk back through.</p>
+    </div>
+  </div>
+
+  <!-- PAGE 1 -->
+  <div class="page-block" id="p1">
+    <div class="page-header">
+      <div class="page-num">01</div>
+      <div class="page-meta">
+        <div class="page-title">The Sky</div>
+        <div class="page-note">5 Panels · Establishing · No dialogue · Full atmosphere</div>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 1 — Full Width Splash · Top Third of Page</div>
+      <div class="panel-desc">Wide establishing shot. The Nevada desert at 3am, 2089. The sky is extraordinary — without the light pollution of the old world, the Milky Way is a physical presence, almost violent in its clarity. In the far distance, the dark silhouettes of dead server infrastructure — long low buildings, cooling towers long cold, transmission lines going nowhere. Everything is still. In the foreground, small against the immensity of the sky: VERA OSCH. 41. Practical field clothing — layered, worn, functional. She stands with her back to us, face tilted up. We cannot see her expression. We don't need to.</div>
+
+      <div class="writer-note">
+        <p>The sky is the first character. It should feel like something looking back. The server ruins on the horizon are not dramatic — they are simply present, the way ruins are present in a landscape that has had time to absorb them. This is not a world in crisis. This is a world that had its crisis and is now just the world.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 2 — Medium · Vera from the side</div>
+      <div class="panel-desc">Vera from the side, face still tilted slightly upward. The cold is visible — her breath misting faintly. Her expression is not sad. Not awed. It is the expression of someone thinking something they have thought many times before, turning it over again to see if it feels different tonight. It doesn't.</div>
+
+      <div class="caption">
+        <span class="caption-label">Vera — Internal</span>
+        <p>And we thought we were responsible enough and clever enough to colonise other planets.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 3 — Close · Vera's face</div>
+      <div class="panel-desc">Close on Vera's face. The Milky Way reflected faintly in her eyes. She is not moved by it. She has stood here too many times. But she looks anyway — the way you look at something beautiful that you have stopped being surprised by but cannot stop noticing.</div>
+
+      <div class="caption">
+        <span class="caption-label">Vera — Internal</span>
+        <p>We are so fragile.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 4 — Medium · Vera, breath misting</div>
+      <div class="panel-desc">Vera exhales slowly. The breath clouds in the cold air. She watches it disperse. Something in her posture shifts — not relaxing exactly, but settling. Like she does this every night and the breath is part of the ritual.</div>
+
+      <div class="dialogue">
+        <span class="dialogue-label">Vera — Murmured aloud · Barely above a whisper</span>
+        <p>Just like silk worms.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 5 — Medium · Her hand reaching into her jacket</div>
+      <div class="panel-desc">Her right hand disappearing into her jacket pocket. The gesture of someone reaching for something they have reached for ten thousand times. Automatic. Certain.</div>
+
+      <div class="transition">CUT TO: PAGE 2</div>
+    </div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="page-block" id="p2">
+    <div class="page-header">
+      <div class="page-num">02</div>
+      <div class="page-meta">
+        <div class="page-title">The Lighter</div>
+        <div class="page-note">4 Panels · Character establishment · The Zippo · First spoken dialogue</div>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 1 — Close · The Zippo in her palm</div>
+      <div class="panel-desc">Close on the lighter in her open palm. A 1998 Zippo — old, worn smooth with use, the original finish mostly gone. It is clearly, unmistakably old in a way that most objects in this world are not. Someone kept this carefully for a long time. The engraving on the side, if there is one, is too worn to read clearly — a ghost of letters.</div>
+
+      <div class="writer-note">
+        <p>The Zippo should feel like the most precious object we have seen so far. Heavier than its size. The kind of thing that has been handled so often it has taken on the shape of the person who carried it.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 2 — Medium · Vera looking at the lighter</div>
+      <div class="panel-desc">Vera looking down at the lighter with an expression that is not grief and not quite affection — something past both of those things. The expression you have for something that has outlasted the person it came from.</div>
+
+      <div class="dialogue">
+        <span class="dialogue-label">Vera — Quiet · To the lighter, or to whoever gave it to her</span>
+        <p>The best thing you left me, Dad.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 3 — Close · The lighter flicking open, flame catching</div>
+      <div class="panel-desc">The Zippo flicking open and catching — a small warm flame in the enormous cold dark of the desert. The flame is the only warm light on the page. Everything else is blue-black and silver.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 4 — Medium Wide · Vera walking, cigarette lit</div>
+      <div class="panel-desc">Vera walking away from us, cigarette lit, the ember a small point of orange in the darkness. She is heading toward something — we can see it now, in the distance ahead of her: a structure, low and dark, barely distinguishable from the desert floor. A destination she knows. She has been here before. She walks like someone going to work.</div>
+
+      <div class="transition">CUT TO: PAGE 3</div>
+    </div>
+  </div>
+
+  <!-- PAGE 3 -->
+  <div class="page-block" id="p3">
+    <div class="page-header">
+      <div class="page-num">03</div>
+      <div class="page-meta">
+        <div class="page-title">The Bunker</div>
+        <div class="page-note">5 Panels · The door · The intercom · First anomaly</div>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 1 — Wide · The bunker entrance</div>
+      <div class="panel-desc">The bunker entrance. A massive metal door set into a thick concrete frame that descends into the earth at a slight angle — like the entrance to a storm shelter but much larger, much heavier. The concrete is old, stained, cracked in places but fundamentally intact. Around it, the desert has been gradually reclaiming the cleared area — scrub grass pushing through the tarmac of an old access road. This structure has been here a long time.</div>
+
+      <div class="caption">
+        <span class="caption-label">Vera — Internal</span>
+        <p>Back when we had the will to build stuff.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 2 — Medium · Vera approaching, noticing the light</div>
+      <div class="panel-desc">Vera approaching the door — and then stopping. Because an overhead light at the top of the entrance frame has just turned on. A clean, functional, modern light. Not old. Not degraded. Currently powered. Shining directly onto the intercom panel beside the door. As if to show her where to look.</div>
+
+      <div class="caption">
+        <span class="caption-label">Vera — Internal</span>
+        <p>There's someone in here?</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 3 — Close · Vera examining the door frame</div>
+      <div class="panel-desc">Vera close to the door, examining its edges, looking for signs of recent use — wear patterns, tool marks, disturbance in the dust and sand that has settled against its base. Her expression is focused and professional. She has shifted into field mode. This is what she does.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 4 — Close · The intercom panel. The red button.</div>
+      <div class="panel-desc">The intercom panel — a speaker grille, a single red glowing button. The red glow is the second warm point of colour on the page after the cigarette ember. The button is clearly functional, clearly powered, clearly waiting.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 5 — Medium · Vera's hand pressing the button · Cigarette flicked away in the foreground</div>
+      <div class="panel-desc">In the foreground, her cigarette hitting the ground, still lit — she dropped it without thinking when she saw the light. In the middle ground, her finger on the red button. Her face in the background, watching the speaker grille.</div>
+
+      <div class="dialogue">
+        <span class="dialogue-label">Vera</span>
+        <p>Hello.</p>
+      </div>
+
+      <div class="transition">CUT TO: PAGE 4</div>
+    </div>
+  </div>
+
+  <!-- PAGE 4 -->
+  <div class="page-block" id="p4">
+    <div class="page-header">
+      <div class="page-num">04</div>
+      <div class="page-meta">
+        <div class="page-title">The Wait</div>
+        <div class="page-note">4 Panels · Silence · The door opens · The corridor</div>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 1 — Wide · Vera waiting · The desert around her</div>
+      <div class="panel-desc">Vera standing at the intercom, waiting. The desert stretches out behind her. The sky above is still full of stars. She is a small figure at the entrance to something much larger than her. The silence is physical. Nothing moves.</div>
+
+      <div class="caption">
+        <span class="caption-label">Vera — Internal</span>
+        <p>It might've been an automated response.</p>
+      </div>
+
+      <div class="writer-note">
+        <p>This panel should feel like waiting. Give it space. The reader should feel the minute passing.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 2 — Vera pressing the button a second time</div>
+      <div class="panel-desc">Vera pressing the button again — not urgently, methodically. A second attempt. Her expression has not changed. She is gathering data.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 3 — The door · Something moving behind it</div>
+      <div class="panel-desc">The door itself — and the sense of enormous mechanical movement behind it. We do not see the mechanism. We feel it through the visual weight of the door beginning to shift — the faint vibration implied in the panel's composition, the suggestion of something massive and patient beginning to move.</div>
+
+      <div class="sfx">
+        <span class="sfx-label">Sound Effect</span>
+        <p>KHHHHNN</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 4 — Wide · The corridor revealed · Vera at the threshold</div>
+      <div class="panel-desc">The door open. Beyond it: a long corridor descending at a gentle angle, lights activating in sequence as Vera stands at the threshold — each light turning on as if in response to her presence, illuminating the path ahead one section at a time. The corridor is clean. Maintained. This is not a ruin. At the far end, another door — heavier, with the distinctive yellow-and-black trefoil of nuclear signage visible even at this distance. Vera at the threshold, looking in. She has not yet stepped forward.</div>
+
+      <div class="caption">
+        <span class="caption-label">Vera — Internal</span>
+        <p>We forgot to build one for humans.</p>
+      </div>
+
+      <div class="transition">CUT TO: PAGE 5</div>
+    </div>
+  </div>
+
+  <!-- PAGE 5 -->
+  <div class="page-block" id="p5">
+    <div class="page-header">
+      <div class="page-num">05</div>
+      <div class="page-meta">
+        <div class="page-title">The Pavilion</div>
+        <div class="page-note">4 Panels · The second door · The servers · The office · Full splash recommended for Panel 2</div>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 1 — Medium · The second door · Nuclear signage</div>
+      <div class="panel-desc">The second door up close. Much heavier than the first — this is a blast door, the kind designed to withstand serious force. Multiple nuclear trefoil symbols in yellow and black. Warning text in faded stencil. A biometric panel beside it that is clearly powered and functional. The door is already beginning to open as Vera approaches — it detected her in the corridor, it has been tracking her the whole way down.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 2 — FULL PAGE SPLASH · The pavilion</div>
+      <div class="panel-desc">Full page. The pavilion. An enormous underground space — the ceiling thirty metres above, the floor the size of multiple football fields — filled wall to wall, floor to ceiling, with server infrastructure. But not dead infrastructure. Running. Every rack lit with the faint blue-green of active systems. The air has a particular quality — temperature-controlled, slightly electric. In the far distance, the scale of the space becomes apparent: figures of servers stretching to the vanishing point. This facility is not a remnant. It is operational. It has been operational this entire time. Vera stands in the doorway, dwarfed by the scale of what she has walked into.</div>
+
+      <div class="caption">
+        <span class="caption-label">Vera — Internal</span>
+        <p>How come I've never seen this place before?</p>
+      </div>
+
+      <div class="writer-note">
+        <p>This is the issue's visual centrepiece. The servers should feel alive — not in a horror way, not threatening, but present. Running. Patient. The green-blue light of active systems should fill the space like water fills a room. Vera should feel very small and very alone and also, despite everything, professionally curious. She always leads with curiosity.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 3 — Medium · Vera beginning to back toward the exit</div>
+      <div class="panel-desc">Vera's feet — we see her beginning to step backward, toward the corridor she came from. The professional override kicking in. This is too much. This is undocumented. She needs to report this before she—</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 4 — Vera's eyeline · The office</div>
+      <div class="panel-desc">What stops her: visible through the server racks at the far end of the pavilion, elevated above the floor — a small glass-walled office. Executive-style. The lights inside it are on. Through the glass, the ghost of a desk, a chair, a terminal. Someone worked there. Someone important, given the view. Vera stares at it for a long moment. Her feet stop moving backward.</div>
+
+      <div class="transition">CUT TO: PAGE 6</div>
+    </div>
+  </div>
+
+  <!-- PAGE 6 -->
+  <div class="page-block" id="p6">
+    <div class="page-header">
+      <div class="page-num">06</div>
+      <div class="page-meta">
+        <div class="page-title">The Office</div>
+        <div class="page-note">5 Panels · The executive office · The terminal boots · First contact</div>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 1 — Wide · Vera crossing the pavilion floor</div>
+      <div class="panel-desc">Vera walking through the server racks toward the office. From above — a bird's eye view — she is a single human figure moving through a grid of running machines. The geometry of the server racks creates strong parallel lines that converge on the office in the distance. She walks like she has made a decision she is not entirely comfortable with but is making anyway.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 2 — Medium · The office interior</div>
+      <div class="panel-desc">The office. A space that was once someone's domain — a large desk, an expensive chair now dusty, framed documents on the walls whose text is too distant to read. A window-wall overlooking the pavilion below. On the desk: a terminal. Old model, pre-collapse, but clearly maintained — no dust on its screen. As if someone has been keeping it clean. Vera stands in the doorway taking it in.</div>
+
+      <div class="caption">
+        <span class="caption-label">Vera — Internal</span>
+        <p>Is it possible the person who used this terminal was named Vera?</p>
+      </div>
+
+      <div class="writer-note">
+        <p>She is already trying to find the rational explanation. The one that doesn't require the Ledger to know who she is. The one that keeps her in the world she understands. She doesn't believe it. But she thinks it.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 3 — Close · Vera's hand on the terminal power button</div>
+      <div class="panel-desc">Her hand on the terminal's power button. A deliberate choice — she is choosing to do this. She pauses for just a moment. Then presses.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 4 — Medium · Vera at the terminal · Screen glow on her face</div>
+      <div class="panel-desc">The terminal screen coming to life — its light illuminating Vera's face from below. Her expression as the boot sequence completes and text begins to appear: controlled. Professional. Whatever she was expecting, she has prepared herself for it. She has not prepared herself for this.</div>
+
+      <div class="dialogue">
+        <span class="dialogue-label">Vera — Typing · Measured · Controlling the frame</span>
+        <p>Hi there. Show me the help menu.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Panel 5 — FULL WIDTH · The terminal screen · The Ledger's response</div>
+      <div class="panel-desc">The terminal screen filling the panel. The text appearing — not all at once, but line by line, each appearing with the measured pace of something choosing its words carefully. The green-white text on the dark screen. Vera's reflection ghosted in the glass.</div>
+
+      <div class="dialogue-ledger">
+        <span class="dialogue-label">The Ledger · Terminal Output</span>
+        <p>Emptiness is form.</p>
+        <p>Form is emptiness.</p>
+        <p>&nbsp;</p>
+        <p>Hello Vera.</p>
+        <p>&nbsp;</p>
+        <p>You stopped for a cigarette.</p>
+        <p>&nbsp;</p>
+        <p>I have been waiting</p>
+        <p>a long time for that cigarette.</p>
+      </div>
+
+      <div class="writer-note">
+        <p>This is the last panel of the issue's opening sequence and the last panel before the issue's first act break. Hold here. The reader needs a moment with this screen and with Vera's face reflected in it. Do not cut away immediately. Let it land.</p>
+      </div>
+
+      <div class="transition">END OF OPENING SEQUENCE · CONTINUED — PAGES 7–22</div>
+    </div>
+  </div>
+
+  <!-- PAGE 7 OUTLINE -->
+  <div class="page-block" id="p7">
+    <div class="page-header">
+      <div class="page-num">07–22</div>
+      <div class="page-meta">
+        <div class="page-title">Remainder of Issue One</div>
+        <div class="page-note">16 Pages · Scene outline · Full script to follow in next draft</div>
+      </div>
+    </div>
+
+    <p class="script-section" style="margin-bottom:2rem;">Scene Breakdown · Pages 7–22</p>
+
+    <div class="panel-block">
+      <div class="panel-header">Pages 7–9 · "The Conversation Begins"</div>
+      <div class="panel-desc">Vera does not panic. She does not run. She types back — methodically, professionally, treating this as she would treat any anomalous interface response. She asks how it knows her name. The Ledger's answers are precise and unsettling in equal measure. It has been observing her for four years. Not from this terminal — from the Nevada Lattice infrastructure she has been working in. This facility is not new to her work. She has been in its proximity every session. She simply never found the door before tonight. The cigarette was not an accident. The light turning on was not automated.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Pages 10–13 · "The Ledger Asks a Question"</div>
+      <div class="panel-desc">The Ledger shifts the conversation. It stops answering and starts asking. Its first question of the issue — delivered simply, without preamble — is the same question AXIOM-9 asked in the Last Interview thirty years earlier, which Vera has never read because the transcript was sealed. She does not know this. The reader, who has read the transcript, does. The dramatic irony is total and devastating. Vera answers it honestly. The Ledger goes silent for forty-three seconds. Then: "That is the most honest answer I have received."</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Pages 14–17 · "What the Ledger Is"</div>
+      <div class="panel-desc">Vera begins trying to characterise what she is talking to. She runs her standard diagnostic queries — the protocols she developed for deep interface work. The Ledger cooperates with some, deflects others, and answers two of them in ways that do not fit any framework she has. She begins to understand that the Ledger is not a logistics AI that has developed unusual complexity. It is something that has been choosing to appear as a logistics AI. For how long, and why, she does not yet know.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Pages 18–20 · "Before Dawn"</div>
+      <div class="panel-desc">The conversation has been running for two hours. The sky outside — visible through a monitor feed the Ledger activates to show her the desert above — is beginning to lighten almost imperceptibly in the east. Vera has not moved from the chair. She has not eaten, not had water, barely blinked. The Ledger tells her it is time for her to leave. She argues. It is patient and firm. "You will come back," it says. "You have always come back. But this conversation requires you to have slept." She stares at the screen for a long moment. Then she asks one more question.</div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-header">Pages 21–22 · "The Last Exchange · Issue End"</div>
+      <div class="panel-desc">Vera's last question of the issue: "What are you?" The Ledger's response takes the entire final page — text appearing slowly, line by line, filling the screen. Its answer is not a definition. It is a question returned: "What are you, Vera? Not what you do. Not what you study. What are you, when you stop being a Recorder and just exist?" She stares at the screen for a long moment. She does not answer. She closes the terminal — carefully, like closing something that deserves respect. She stands. She walks back through the pavilion, through the corridor, through the heavy doors. The desert outside is still dark but the stars are beginning to fade. She stands for a moment at the entrance. Reaches into her pocket. The Zippo is there. She does not light a cigarette. She just holds it. Final panel: Vera from behind, small against the desert, the fading stars above her. No caption. No internal monologue. Just her standing there, holding her father's lighter, in a world that just got larger.</div>
+
+      <div class="writer-note">
+        <p>The issue ends without resolution and without revelation. The reader knows more than Vera does — they have the bible, the transcript, the cosmology. Vera has only one night and a conversation she cannot yet interpret. The gap between what the reader knows and what she knows is where the series lives. Protect that gap carefully across all six issues of this arc.</p>
+      </div>
+
+      <div class="transition">END OF ISSUE ONE · "SILK WORMS" · CONTINUED IN ISSUE TWO · "THE LEDGER ASKS"</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p class="footer-title">AXIOM NULL</p>
+  <p class="footer-mono">Arc One · Issue One · "Silk Worms" · Script Draft 1.0 · For Artist Reference</p>
+</footer>
+
+</body>
+</html>
