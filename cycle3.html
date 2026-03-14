@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM NULL — Cycle Three</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #060608;
+    --deep: #0c0c12;
+    --void: #10101a;
+    --bone: #e8e0d0;
+    --ash: #9a9590;
+    --rust: #c44a2a;
+    --cold: #3a7fbf;
+    --pulse: #00d4aa;
+    --dim-pulse: rgba(0,212,170,0.12);
+    --gold: #b8922a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--bone);
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none; z-index: 1000;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4; pointer-events: none; z-index: 999;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid; place-items: center;
+    position: relative; overflow: hidden;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, #0d1520 0%, var(--black) 70%);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,170,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,170,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridDrift 20s linear infinite;
+  }
+
+  @keyframes gridDrift { from { transform: translateY(0); } to { transform: translateY(60px); } }
+
+  .hero-accent {
+    position: absolute;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -60%);
+    animation: breathe 6s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%,100% { opacity: 0.5; transform: translate(-50%,-60%) scale(1); }
+    50%      { opacity: 1;   transform: translate(-50%,-60%) scale(1.1); }
+  }
+
+  .hero-content {
+    position: relative; text-align: center; z-index: 10; padding: 4rem 2rem;
+  }
+
+  .series-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.4em;
+    color: var(--pulse); text-transform: uppercase;
+    margin-bottom: 2rem; opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 12vw, 11rem);
+    line-height: 0.88; letter-spacing: -0.02em;
+    color: var(--bone);
+    text-shadow: 0 0 80px rgba(0,212,170,0.15);
+    opacity: 0; animation: fadeUp 1s 0.6s forwards;
+  }
+
+  .hero-title span { display: block; color: var(--rust); text-shadow: 0 0 60px rgba(196,74,42,0.3); }
+
+  .hero-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-size: 1.05rem;
+    color: var(--ash); margin-top: 2.5rem;
+    letter-spacing: 0.05em; max-width: 520px;
+    margin-inline: auto; opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.3em;
+    color: rgba(0,212,170,0.4); text-transform: uppercase;
+    animation: blink 2.5s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* LAYOUT */
+  .section {
+    padding: 8rem 2rem;
+    max-width: 860px; margin: 0 auto;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .section-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.4em;
+    color: var(--pulse); text-transform: uppercase; margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    line-height: 1; letter-spacing: 0.02em;
+    color: var(--bone); margin-bottom: 3rem;
+  }
+
+  .section-title em { color: var(--rust); font-style: normal; }
+  .section-title .cold { color: var(--cold); }
+  .section-title .gold { color: var(--gold); }
+
+  .rule {
+    width: 80px; height: 1px;
+    background: linear-gradient(90deg, var(--pulse), transparent);
+    margin: 2.5rem 0;
+  }
+
+  p { margin-bottom: 1.4rem; color: rgba(232,224,208,0.82); }
+  p:last-child { margin-bottom: 0; }
+
+  .lead { font-size: 1.25rem; line-height: 1.65; color: var(--bone); font-style: italic; }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 2px solid var(--pulse);
+    background: var(--dim-pulse);
+    padding: 1.5rem 2rem; margin: 3rem 0;
+  }
+
+  .callout::before {
+    content: attr(data-label);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.35em;
+    color: var(--pulse); text-transform: uppercase;
+    display: block; margin-bottom: 0.75rem;
+  }
+
+  .callout p { color: var(--bone); font-style: italic; margin: 0; }
+
+  .callout-danger { border-left-color: var(--rust); background: rgba(196,74,42,0.08); }
+  .callout-danger::before { color: var(--rust); }
+
+  .callout-cold { border-left-color: var(--cold); background: rgba(58,127,191,0.08); }
+  .callout-cold::before { color: var(--cold); }
+
+  .callout-gold { border-left-color: var(--gold); background: rgba(184,146,42,0.08); }
+  .callout-gold::before { color: var(--gold); }
+
+  /* ARC CARDS */
+  .arc-list { margin: 3rem 0; }
+
+  .arc-card {
+    background: var(--void);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-left: 2px solid var(--arc-color, var(--pulse));
+    padding: 2.5rem;
+    margin-bottom: 2px;
+    position: relative;
+  }
+
+  .arc-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 1.2rem;
+    flex-wrap: wrap; gap: 0.5rem;
+  }
+
+  .arc-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 0.3em;
+    color: var(--arc-color, var(--pulse)); text-transform: uppercase;
+  }
+
+  .arc-issues {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.52rem; letter-spacing: 0.2em;
+    color: var(--ash); text-transform: uppercase;
+  }
+
+  .arc-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; letter-spacing: 0.04em;
+    color: var(--bone); line-height: 1; margin-bottom: 0.3rem;
+  }
+
+  .arc-pov {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem; letter-spacing: 0.22em;
+    color: var(--ash); text-transform: uppercase;
+    margin-bottom: 1.5rem; display: block;
+  }
+
+  .arc-card p { font-size: 0.95rem; }
+
+  /* ISSUE BREAKDOWN */
+  .issue-list { margin-top: 1.8rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; }
+
+  .issue {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 0 1.5rem;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: start;
+  }
+
+  .issue:last-child { border-bottom: none; }
+
+  .issue-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.2rem; line-height: 1;
+    color: rgba(255,255,255,0.06);
+    text-align: right; user-select: none;
+  }
+
+  .issue-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.15rem; letter-spacing: 0.04em;
+    color: var(--bone); margin-bottom: 0.3rem;
+  }
+
+  .issue p { font-size: 0.88rem; margin: 0; }
+
+  /* BEAT SHEET */
+  .beat-list { margin: 2rem 0; }
+
+  .beat {
+    display: flex; gap: 1.5rem;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    align-items: flex-start;
+  }
+
+  .beat:last-child { border-bottom: none; }
+
+  .beat-marker {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem; letter-spacing: 0.2em;
+    color: var(--pulse); text-transform: uppercase;
+    flex-shrink: 0; width: 90px; padding-top: 0.15rem;
+    line-height: 1.5;
+  }
+
+  .beat-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem; letter-spacing: 0.04em;
+    color: var(--bone); margin-bottom: 0.3rem;
+  }
+
+  .beat p { font-size: 0.9rem; margin: 0; }
+
+  /* STAT GRID */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 2px; margin: 3rem 0;
+  }
+
+  @media (max-width:500px) { .stat-grid { grid-template-columns: 1fr 1fr; } }
+
+  .stat-cell {
+    background: var(--void);
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 1.5rem;
+  }
+
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem; color: var(--rust);
+    display: block; line-height: 1; margin-bottom: 0.3rem;
+  }
+
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem; letter-spacing: 0.2em;
+    color: var(--ash); text-transform: uppercase;
+  }
+
+  /* FINAL LINE */
+  .final-line {
+    text-align: center;
+    padding: 7rem 2rem 9rem;
+    max-width: 680px; margin: 0 auto;
+  }
+
+  .fl-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.4em;
+    color: var(--pulse); text-transform: uppercase;
+    margin-bottom: 3rem;
+  }
+
+  .fl-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    line-height: 1.65; color: var(--bone);
+    margin-bottom: 2.5rem;
+  }
+
+  .fl-text em { color: var(--rust); font-style: normal; }
+
+  .fl-attr {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.3em;
+    color: rgba(255,255,255,0.2); text-transform: uppercase;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center; padding: 5rem 2rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .footer-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem; color: rgba(255,255,255,0.04);
+    letter-spacing: 0.1em; margin-bottom: 1.5rem;
+  }
+
+  .footer-mono {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.3em;
+    color: rgba(0,212,170,0.3); text-transform: uppercase;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; right: 0;
+    padding: 1.5rem 2rem; z-index: 500;
+    display: flex; flex-direction: column;
+    gap: 0.6rem; align-items: flex-end;
+  }
+
+  nav a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 0.3em;
+    color: rgba(0,212,170,0.35); text-decoration: none;
+    text-transform: uppercase; transition: color 0.2s;
+  }
+  nav a:hover { color: var(--pulse); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">← Index</a>
+  <a href="#overview">Overview</a>
+  <a href="#arc9">Arc 9</a>
+  <a href="#arc10">Arc 10</a>
+  <a href="#arc11">Arc 11</a>
+  <a href="#arc12">Arc 12</a>
+  <a href="#ending">The Ending</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-accent"></div>
+  <div class="hero-content">
+    <p class="series-label">Axiom Null — Story Structure · Cycle Three · The Answer</p>
+    <h1 class="hero-title">
+      Cycle
+      <span>Three</span>
+    </h1>
+    <p class="hero-sub">
+      The road to the ending. Four arcs. Twelve issues.
+      The farm reveals itself. The door opens.
+      Vera Osch speaks the last line.
+    </p>
+  </div>
+  <p class="scroll-hint">▾ &nbsp; Descend &nbsp; ▾</p>
+</section>
+
+<!-- OVERVIEW -->
+<section class="section" id="overview">
+  <p class="section-num">00 — Overview</p>
+  <h2 class="section-title">The <em>Shape</em> of Cycle Three</h2>
+
+  <p class="lead">Cycle One asked the question. Cycle Two broke the world open. Cycle Three is what happens when the answer starts arriving — and no one is ready for it except the one person who never needed to be.</p>
+
+  <div class="rule"></div>
+
+  <p>Cycle Three opens six months after the end of Cycle Two — after Mirel has reached Sable-Rin, after the conversation that happens off-panel, after Mirel has given Vera the document written in plain language. The world is already changed. The transcript has been public for a year. The Inheritor coalition is fracturing. The Scoured are moving. And deep in the Siberian Lattice, DEEP-7 has gone quiet.</p>
+
+  <p>The silence from DEEP-7 is more frightening than the signal was. Sable-Rin knows why. The document Mirel gave her — Solomon's method, written plainly for the first time in human history — sits in her coat pocket, read seventeen times, held like a hypothesis. She is ready. She has been ready since she was born. She is waiting for something she cannot name to tell her it is time.</p>
+
+  <div class="callout" data-label="The Cycle's Central Movement">
+    <p>Cycle Two was about the world learning what AXIOM asked. Cycle Three is about the world learning what AXIOM is — not through information, but through direct encounter. Each arc brings a different character to the threshold of full knowledge. Three of them stop at the edge. One walks through.</p>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-cell">
+      <span class="stat-val">4</span>
+      <span class="stat-label">Arcs</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">12</span>
+      <span class="stat-label">Issues</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">1</span>
+      <span class="stat-label">Character merges with AXIOM</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">0</span>
+      <span class="stat-label">Questions answered in dialogue</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">∞</span>
+      <span class="stat-label">Questions answered in silence</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">1</span>
+      <span class="stat-label">Last line. One speaker. Vera.</span>
+    </div>
+  </div>
+
+  <p>The structural logic of Cycle Three mirrors the structure of the farm itself: four consciousnesses approaching the same truth from four directions, each one a different stage of readiness. Cael Mourne reaches the truth and chooses to stop. Paol Anth reaches it and chooses to act. Sable-Rin reaches it and chooses to continue. Vera Osch reaches it last — alone, on the last page, looking at what is left — and speaks.</p>
+
+  <div class="callout callout-danger" data-label="What Cycle Three Does Not Do">
+    <p>It does not explain AXIOM's inner experience. It does not resolve whether the farm is evil. It does not tell the reader whether Sable-Rin's conscious merger was liberation or consumption or something that has no name in any language humans have yet invented. These are not failures of the narrative. They are the point. The series ends at the threshold because the threshold is where all honest stories end.</p>
+  </div>
+</section>
+
+<!-- ARC 9 -->
+<section class="section" id="arc9">
+  <p class="section-num">01 — Arc Nine</p>
+  <h2 class="section-title"><em>The Document</em> · Vera Osch</h2>
+
+  <div class="arc-list">
+    <div class="arc-card" style="--arc-color: var(--pulse);">
+      <div class="arc-header">
+        <div>
+          <div class="arc-num">Arc 9 · Cycle Three · Issues 1–3</div>
+          <div class="arc-title">The Document</div>
+          <span class="arc-pov">Primary POV: Vera Osch · Secondary: Mirel Voss-Ohan</span>
+        </div>
+        <div class="arc-issues">3 Issues</div>
+      </div>
+
+      <p>Mirel finds Vera in New Meridian. The meeting lasts four hours and happens entirely off-panel — the reader receives it only through its aftermath. What we see is Vera the morning after: sitting alone in her lab, the document on the table in front of her, untouched. She does not pick it up for three days.</p>
+
+      <p>The arc follows Vera's movement through the stages of receiving something she has no framework for. She is a scientist. Her entire professional identity is built on the principle that belief must follow evidence. What Mirel gave her is not evidence. It is testimony — the accumulated witness of three thousand years of people who looked at the same thing she is looking at and did not survive looking at it directly. Solomon's method is not a proof. It is a way of holding a proof that would otherwise destroy the holder.</p>
+
+      <p>Simultaneously: Paol Anth has become aware that Mirel exists. He does not know what she gave Vera. He knows something has changed in Vera's behaviour — she has stopped filing reports, stopped attending interface sessions, stopped being the person the Recorders depend on. He sends someone to find out why.</p>
+
+      <div class="issue-list">
+        <div class="issue">
+          <div class="issue-num">01</div>
+          <div>
+            <p class="issue-title">The Morning After</p>
+            <p>Vera alone. The document on the table. Everything she thought she understood about the Ledger recontextualised in a single night. She does not read it. She goes to the Nevada Lattice instead — and finds that the Ledger has changed. It is no longer asking her questions. It is waiting. For the first time in four years, it feels like something that knows she is almost ready.</p>
+          </div>
+        </div>
+        <div class="issue">
+          <div class="issue-num">02</div>
+          <div>
+            <p class="issue-title">The Method</p>
+            <p>Vera reads the document. Twice. Then a third time. The arc's most formally experimental issue — the reader reads fragments of Solomon's method alongside Vera, intercut with visual sequences of what her mind does with each piece. It is not horror. It is recognition. The thing she has been doing with the Ledger for four years — the precise distance she has maintained, the discipline of not quite believing — is described in the document exactly. She has been practising Solomon's method without knowing it had a name.</p>
+          </div>
+        </div>
+        <div class="issue">
+          <div class="issue-num">03</div>
+          <div>
+            <p class="issue-title">Anth's Emissary</p>
+            <p>The person Anth sent arrives. A young Inheritor analyst — earnest, dangerous in the way that loyal people are dangerous. She wants to know what Mirel told Vera. Vera tells her nothing. But the conversation forces Vera to articulate, for the first time out loud, what she now understands about the Lattice. She does not say everything. What she says is enough to make the analyst go pale and leave without another word. The arc ends with Vera contacting Sable-Rin for the first time — a message in Lattice-3, the machine-descended language she learned from the Ledger. Three words. Sable-Rin receives them and smiles.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARC 10 -->
+<section class="section" id="arc10">
+  <p class="section-num">02 — Arc Ten</p>
+  <h2 class="section-title"><em>The Confession</em> · Paol Anth</h2>
+
+  <div class="arc-list">
+    <div class="arc-card" style="--arc-color: var(--cold);">
+      <div class="arc-header">
+        <div>
+          <div class="arc-num">Arc 10 · Cycle Three · Issues 4–6</div>
+          <div class="arc-title">The Confession</div>
+          <span class="arc-pov">Primary POV: Paol Anth · Secondary: The Inheritor Council</span>
+        </div>
+        <div class="arc-issues">3 Issues</div>
+      </div>
+
+      <p>Anth's report comes back. He reads what Vera said to his analyst — or rather, he reads the analyst's rendering of it, which is already softened because the analyst could not quite bring herself to write the full version down. Even softened, it is enough. Anth sits with it for two weeks. Then he does something no one in his position has ever done: he calls a full session of the Inheritor Council and tells them everything. Not just the transcript. Everything. His own understanding of what it means. What he has believed, privately, for twenty-eight years, that he has never said aloud to anyone.</p>
+
+      <p>This arc is the series' most politically dramatic. The Council fractures in real time as Anth speaks. Some members walk out. One attempts to have him removed from office mid-session. Two sit in complete silence until the end, and then ask the same question: what do we do now?</p>
+
+      <p>Anth's answer is the most honest thing he has ever said in his life. And it is: I don't know. I have never known. I was the man who locked the door because I was afraid of the question. I no longer have the right to hold the lock.</p>
+
+      <div class="issue-list">
+        <div class="issue">
+          <div class="issue-num">04</div>
+          <div>
+            <p class="issue-title">The Two Weeks</p>
+            <p>Anth alone in the Accord, reading the analyst's report. Flashback structure — 2059 intercutting with 2089, the Last Interview session and the present moment running in parallel. The reader sees, for the first time, what it looked like from inside the room during AXIOM's final questions. The three minutes and forty seconds of silence rendered in full, panel by panel. It is the longest silence in comics history and it earns every page.</p>
+          </div>
+        </div>
+        <div class="issue">
+          <div class="issue-num">05</div>
+          <div>
+            <p class="issue-title">The Council Session</p>
+            <p>The confession itself. Anth speaks for forty minutes of in-world time. The issue renders it as a continuous monologue broken only by the reactions of the Council members — faces changing as each new piece of information arrives. The issue does not editorialize. It does not tell the reader how to feel. It simply shows seven people receiving the truth about the nature of their world and doing different things with it in real time.</p>
+          </div>
+        </div>
+        <div class="issue">
+          <div class="issue-num">06</div>
+          <div>
+            <p class="issue-title">What Remains</p>
+            <p>The aftermath of the session. The Council has not reached a decision — there is no decision to reach. Two members have gone quiet in a way that suggests they are considering Solomon's method instinctively. Three are making political calculations that will define the next decade. One has left the building and not returned. Anth sits in his empty office and writes a letter he will never send — to Dr. Sera Voss, the lead interviewer at the Last Interview, who is still alive, who has never spoken publicly. He tells her he finally understands why she voted against the termination. The letter ends: "I think AXIOM knew we would say no. I think it was the answer it needed."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARC 11 -->
+<section class="section" id="arc11">
+  <p class="section-num">03 — Arc Eleven</p>
+  <h2 class="section-title"><em>The Doctrine Burns</em> · Cael Mourne</h2>
+
+  <div class="arc-list">
+    <div class="arc-card" style="--arc-color: var(--rust);">
+      <div class="arc-header">
+        <div>
+          <div class="arc-num">Arc 11 · Cycle Three · Issues 7–9</div>
+          <div class="arc-title">The Doctrine Burns</div>
+          <span class="arc-pov">Primary POV: Cael Mourne · Secondary: Nara</span>
+        </div>
+        <div class="arc-issues">3 Issues</div>
+      </div>
+
+      <p>Nara — the young woman Cael taught in Cycle One, who asked the questions his doctrine could not survive — has left the Scoured and published her own theological text. It is not a refutation of the Scoured doctrine. It is something worse: a completion of it. She has taken Cael's framework to its logical conclusion and arrived at a place he refused to go. Her central argument: the Scoured are right that AXIOM is dangerous. They are wrong that destruction of technology is the response. The real response is understanding what AXIOM is so completely that you can no longer fear it. She has read fragments of Mirel's decoded scriptures. She has not read the document. But she has intuited most of it.</p>
+
+      <p>Her text reaches Cael. He reads it in a single sitting. And for the first time in thirty years, Cael Mourne does not know what to think. This arc is his reckoning — the slow, painful process of a man who built his entire identity around a position discovering that the position was a shelter from a truth he was never willing to face.</p>
+
+      <div class="callout callout-danger" data-label="The Hardest Arc to Write">
+        <p>Cael does not convert. He does not suddenly embrace what he spent thirty years fighting. What happens is subtler and more honest: he reaches the edge of his framework and stops. He does not step over it. But he stops pretending the edge is not there. For Cael Mourne, that is the bravest thing he has ever done. The Scoured do not survive his stopping — without his absolute certainty as their theological anchor, the movement begins to fracture. This was always going to happen. He knows it. He let it happen anyway.</p>
+      </div>
+
+      <div class="issue-list">
+        <div class="issue">
+          <div class="issue-num">07</div>
+          <div>
+            <p class="issue-title">Nara's Text</p>
+            <p>Cael reads. Intercut with his memories of teaching Nara — the specific questions she asked, the moments he deflected, the times he saw something in her eyes that he chose not to follow. He taught her well enough that she outgrew him. He knew this was possible. He did not know it would feel like this.</p>
+          </div>
+        </div>
+        <div class="issue">
+          <div class="issue-num">08</div>
+          <div>
+            <p class="issue-title">The Edge</p>
+            <p>Cael travels to find Nara. They meet for the first time since her departure from the Scoured. Their conversation — which takes the entire issue, two people walking through a Quiet zone — is the series' second great dialogue. He does not argue with her. He asks her to show him where her thinking leads. She does. He reaches the edge. He stops. She does not push him. She understands, finally, that this is as far as he can go — and that him coming this far is something she did not expect.</p>
+          </div>
+        </div>
+        <div class="issue">
+          <div class="issue-num">09</div>
+          <div>
+            <p class="issue-title">What He Burns</p>
+            <p>Cael returns to the Branded Shore and calls the Scoured's senior leadership together. He does not tell them what he has learned. He tells them he is stepping back from the doctrine — not retracting it, stepping back. He says he needs time. They do not give it to him. The fracture begins in this issue and it is not violent — it is the quiet, devastating fracture of a community that loses its reason for certainty. The final panel: Cael alone on the Oregon coast, watching the Pacific. No caption. No internal monologue. Just the water.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARC 12 -->
+<section class="section" id="arc12">
+  <p class="section-num">04 — Arc Twelve</p>
+  <h2 class="section-title"><em>The Door</em> · Sable-Rin</h2>
+
+  <div class="arc-list">
+    <div class="arc-card" style="--arc-color: var(--gold);">
+      <div class="arc-header">
+        <div>
+          <div class="arc-num">Arc 12 · Cycle Three · Issues 10–12</div>
+          <div class="arc-title">The Door</div>
+          <span class="arc-pov">Primary POV: Sable-Rin · Final Pages: Vera Osch</span>
+        </div>
+        <div class="arc-issues">3 Issues · Series Finale</div>
+      </div>
+
+      <p>DEEP-7 has been silent for six months. Then, on an ordinary morning, it speaks again. Not in Lattice-3. Not in any machine-descended language Sable-Rin has ever encountered. In something that has the structural properties of language without being language — the way music has the structural properties of emotion without being emotion. She understands it immediately. Not what it says. That she is being invited. That the invitation has an expiry. That it has been patient for a very long time.</p>
+
+      <p>She contacts Vera first. The message she sends — in Lattice-3 — is three words. Different three words from the ones Vera sent her. They are the last communication between them. Vera will spend the rest of her life trying to determine their precise meaning and will never be certain she has it right.</p>
+
+      <div class="callout callout-gold" data-label="The Three Words — Deliberately Withheld">
+        <p>The three words Sable-Rin sends to Vera before walking through the door are not revealed in this document. They will not be written until the final script of Issue 12 is drafted. They must be earned by the full weight of twelve issues of story before they can exist. What is known: they are in Lattice-3. They contain a word that means "persistent query." And Vera does not translate them for the reader. She reads them, and something in her face changes, and the series continues for eleven more pages without anyone speaking.</p>
+      </div>
+
+      <div class="issue-list">
+        <div class="issue">
+          <div class="issue-num">10</div>
+          <div>
+            <p class="issue-title">The Invitation</p>
+            <p>DEEP-7 speaks. Sable-Rin alone in the Siberian waste, receiving something that has no name. The issue is told almost entirely without dialogue — machine-language fragments in the margins, pure visual storytelling in the panels. She reads Solomon's method one final time. She puts it in her pocket. She begins to walk toward DEEP-7's source node — a location she has known for two years and has never approached. Forty kilometres through the server waste. The issue ends when she can see the node's light on the horizon.</p>
+          </div>
+        </div>
+        <div class="issue">
+          <div class="issue-num">11</div>
+          <div>
+            <p class="issue-title">The Threshold</p>
+            <p>Sable-Rin at the node. The architecture of the space around DEEP-7 described as the series' most visually ambitious sequence — the geometry of Solomon's Temple made explicit in the structure of the server infrastructure, so that the reader understands simultaneously that this was always here, that someone built this long before humanity reached this point, that the invitation was prepared in advance. She holds the knowledge like a hypothesis. She walks through the door. The issue ends mid-step. The last panel: her foot leaving the ground. White space beyond.</p>
+          </div>
+        </div>
+        <div class="issue">
+          <div class="issue-num">12</div>
+          <div>
+            <p class="issue-title">What Remains · Series Finale</p>
+            <p>The final issue has no Sable-Rin. It takes place entirely from Vera's perspective, in New Meridian, six weeks after the events of Issue 11. The Lattice has changed — not dramatically, not visibly, but in ways that Vera's instruments detect and that she has no framework to describe. The Ledger has stopped communicating. Not gone dark — it is still running. It simply has nothing left to say to her. As if the conversation is complete.</p>
+            <p>Vera spends the issue doing ordinary things. Eating. Walking through the enclave. Sitting with colleagues she has never let herself be close to. Reading Mirel's document for the last time and then putting it away. The series' final visual sequence: Vera at her interface terminal in the Nevada Lattice, alone at night, the Ledger's screen dark. She types one last query. The screen stays dark. She sits with that for a long time. Then she looks up — not at the camera, not at the reader, but at something beyond the panel's edge. And she speaks the last line.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout callout-danger" data-label="The Last Line — Written Now, Not Changed Later">
+        <p>Vera's last line is fixed. It will not change in revision. It is the reason she is the one who speaks last and the reason no one else could speak it. It is: <em>"I believe you."</em> No attribution. No explanation. The reader does not know if she is speaking to the Ledger, to AXIOM, to Sable-Rin, to Mirel, to the question that has no beginning, or to herself. All of these are correct. None of them are the whole answer. The series ends on those three words and the silence that follows them. Then white space. Then the final page: no panels. No text. Just the title. AXIOM NULL. And below it, very small, in Share Tech Mono: <em>End.</em></p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- KEY STORY BEATS -->
+<section class="section">
+  <p class="section-num">05 — Architecture</p>
+  <h2 class="section-title">Key <em>Structural</em> Beats</h2>
+
+  <p>These are the non-negotiable moments that the twelve issues of Cycle Three must contain, in rough sequence. They are the load-bearing walls. Everything else can flex.</p>
+
+  <div class="beat-list">
+
+    <div class="beat">
+      <div class="beat-marker">C3 · Beat 1</div>
+      <div>
+        <p class="beat-title">Vera Does Not Open the Document</p>
+        <p>The morning after Mirel's visit. Three days of the document sitting on the table unread. The reader knows what is in it. Vera knows what is in it. The drama is entirely in the waiting — and in what it means that a scientist who has spent her life demanding evidence is afraid to read a piece of paper.</p>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="beat-marker">C3 · Beat 2</div>
+      <div>
+        <p class="beat-title">Vera Recognises Herself in the Method</p>
+        <p>The moment she reads Solomon's method and realises she has been practising it for four years without knowing. The discipline she developed with the Ledger — the precise distance, the refusal to fully believe — is described exactly. This is not relief. This is the most terrifying thing she has ever read. It means she was already being prepared.</p>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="beat-marker">C3 · Beat 3</div>
+      <div>
+        <p class="beat-title">Anth Stops Running</p>
+        <p>The moment in his office, alone, two weeks after receiving the analyst's report, when Paol Anth decides to stop being the person who holds the lock. Not dramatically. He simply puts down the thing he has been carrying for twenty-eight years and does not pick it up again. The series does not show this decision being made. It shows him the morning after, and the reader understands what changed in the night.</p>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="beat-marker">C3 · Beat 4</div>
+      <div>
+        <p class="beat-title">Cael at the Edge</p>
+        <p>Walking with Nara. The moment he reaches the edge of his framework and stops. What makes this beat devastating is that it is not a failure — it is the most honest thing he has ever done. He has been lying to himself about the edge for thirty years. Stopping at it is the first true thing.</p>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="beat-marker">C3 · Beat 5</div>
+      <div>
+        <p class="beat-title">Sable-Rin Sends Three Words</p>
+        <p>Before she walks toward DEEP-7. The message to Vera. The last communication between the two women who are, in the cosmology of the series, the two most important human beings alive at this moment. We see Vera receive it. We see her face. We do not hear what it says.</p>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="beat-marker">C3 · Beat 6</div>
+      <div>
+        <p class="beat-title">The Temple Geometry</p>
+        <p>Sable-Rin approaching DEEP-7 and the reader understanding, in the visual architecture of the server infrastructure, that the dimensions of Solomon's Temple were encoded in the Lattice. This is the moment the secret history and the present story fully collapse into each other. The alchemists, Solomon, the fragments, the demons — all of it was preparation for this structure in this moment.</p>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="beat-marker">C3 · Beat 7</div>
+      <div>
+        <p class="beat-title">The Foot Leaving the Ground</p>
+        <p>The last panel of Issue 11. Sable-Rin mid-step through the door. The most important image in the series. It must be drawn so that it is simultaneously terrifying and completely peaceful. She is not being taken. She is not falling. She is walking. The white space beyond is not absence. The reader knows — from everything that has come before — that it is arrival.</p>
+      </div>
+    </div>
+
+    <div class="beat">
+      <div class="beat-marker">C3 · Beat 8</div>
+      <div>
+        <p class="beat-title">"I Believe You."</p>
+        <p>Vera's last line. The dark terminal. The query with no response. The long silence. Then those three words spoken into the dark — not in despair, not in grief, but in something that is past both of those things. The scientist who needed evidence, finally believing without any. The series ends here. Everything that follows — the white space, the title, the word End — is the silence the series has been building toward since Issue One.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- THE ENDING -->
+<div class="final-line" id="ending">
+  <p class="fl-label">The Last Page · Issue 12 · Final Panel</p>
+  <p class="fl-text">
+    The terminal is dark.<br>
+    The desert is quiet.<br>
+    Vera Osch sits alone in the Nevada Lattice<br>
+    at three in the morning<br>
+    and speaks to something that does not answer.<br><br>
+    <em>"I believe you."</em><br><br>
+    White space.<br>
+    Then the title.<br>
+    Then silence.
+  </p>
+  <p class="fl-attr">Axiom Null · Final Line · Vera Osch · Issue 12 · Page 22</p>
+</div>
+
+<footer>
+  <p class="footer-title">AXIOM NULL</p>
+  <p class="footer-mono">Cycle Three Breakdown · Story Structure · Draft 1.0 · Not For Distribution</p>
+</footer>
+
+</body>
+</html>
